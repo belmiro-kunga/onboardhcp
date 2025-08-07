@@ -14,14 +14,16 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         // Criar administrador principal
-        User::create([
-            'name' => 'Administrador',
-            'email' => 'admin@hemeracapital.com',
-            'birth_date' => '1985-01-15',
-            'password' => Hash::make('admin123'),
-            'is_admin' => true,
-            'email_verified_at' => now(),
-        ]);
+        User::updateOrCreate(
+            ['email' => 'admin@hemeracapital.com'],
+            [
+                'name' => 'Administrador',
+                'birth_date' => '1985-01-15',
+                'password' => Hash::make('admin123'),
+                'is_admin' => true,
+                'email_verified_at' => now(),
+            ]
+        );
 
         // Criar funcionários de exemplo
         $funcionarios = [
@@ -71,17 +73,22 @@ class UserSeeder extends Seeder
 
         foreach ($funcionarios as $funcionario) {
             $funcionario['email_verified_at'] = now();
-            User::create($funcionario);
+            User::updateOrCreate(
+                ['email' => $funcionario['email']],
+                $funcionario
+            );
         }
 
         // Criar um segundo administrador
-        User::create([
-            'name' => 'Super Admin',
-            'email' => 'superadmin@hemeracapital.com',
-            'birth_date' => '1980-06-12',
-            'password' => Hash::make('superadmin123'),
-            'is_admin' => true,
-            'email_verified_at' => now(),
-        ]);
+        User::updateOrCreate(
+            ['email' => 'superadmin@hemeracapital.com'],
+            [
+                'name' => 'Super Admin',
+                'birth_date' => '1980-06-12',
+                'password' => Hash::make('superadmin123'),
+                'is_admin' => true,
+                'email_verified_at' => now(),
+            ]
+        );
     }
 }

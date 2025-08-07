@@ -8,7 +8,15 @@ class AuthService
 {
     public function attemptLogin(array $credentials): bool
     {
-        return Auth::attempt($credentials);
+        $result = Auth::attempt($credentials);
+        
+        if ($result) {
+            // Update last login timestamp
+            $user = Auth::user();
+            $user->update(['last_login_at' => now()]);
+        }
+        
+        return $result;
     }
 
     public function logout(): void

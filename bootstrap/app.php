@@ -17,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withProviders([
         \App\Modules\ModuleServiceProvider::class,
+        \App\Providers\PermissionServiceProvider::class,
     ])
     ->withExceptions(function (Exceptions $exceptions): void {
         //

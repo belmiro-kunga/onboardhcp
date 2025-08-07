@@ -35,4 +35,17 @@ return [
         ],
     ],
 
+    'youtube' => [
+        'api_key' => env('YOUTUBE_API_KEY'),
+    ],
+
+    'cloudflare_r2' => [
+        'access_key_id' => env('CLOUDFLARE_R2_ACCESS_KEY_ID'),
+        'secret_access_key' => env('CLOUDFLARE_R2_SECRET_ACCESS_KEY'),
+        'region' => env('CLOUDFLARE_R2_REGION', 'auto'),
+        'bucket' => env('CLOUDFLARE_R2_BUCKET'),
+        'endpoint' => env('CLOUDFLARE_R2_ENDPOINT'),
+        'public_url' => env('CLOUDFLARE_R2_PUBLIC_URL'),
+    ],
+
 ];

@@ -143,6 +143,16 @@ class SimuladoService
         ];
     }
 
+    public function getTotalSimuladosCount(): int
+    {
+        return Simulado::count();
+    }
+
+    public function getActiveSimuladosCount(): int
+    {
+        return Simulado::ativos()->count();
+    }
+
     private function getTaxaAprovacao()
     {
         $totalTentativas = SimuladoTentativa::whereNotNull('finalizado_em')->count();

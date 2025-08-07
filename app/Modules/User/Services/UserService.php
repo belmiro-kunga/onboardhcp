@@ -57,6 +57,12 @@ class UserService
         return User::employees()->count();
     }
 
+    public function getActiveUsersCount(): int
+    {
+        // Consider users active if they logged in within the last 30 days
+        return User::where('last_login_at', '>=', now()->subDays(30))->count();
+    }
+
     public function findByEmail(string $email): ?User
     {
         return User::where('email', $email)->first();
