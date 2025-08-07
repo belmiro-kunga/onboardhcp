@@ -106,4 +106,56 @@ class AdminController extends Controller
         $this->userService->deleteUser($user);
         return redirect()->route('admin.users')->with('success', 'Utilizador eliminado com sucesso!');
     }
+
+    public function simulados()
+    {
+        $simuladoService = app(\App\Modules\Simulado\Services\SimuladoService::class);
+        $simulados = $simuladoService->getAllSimulados();
+        $estatisticas = $simuladoService->getEstatisticas();
+        
+        return view('admin.simulados.index', compact('simulados', 'estatisticas'));
+    }
+
+    public function createSimulado(Request $request)
+    {
+        $validatedData = $request->validate([
+            'titulo' => 'required|string|max:255',
+            'descricao' => 'nullable|string',
+            'duracao_minutos' => 'required|integer|min:1',
+            'nota_aprovacao' => 'required|integer|min:1|max:100',
+            'ativo' => 'boolean'
+        ]);
+
+        $simuladoService = app(\App\Modules\Simulado\Services\SimuladoService::class);
+        $simuladoService->createSimulado($validatedData);
+
+        return redirect()->route('admin.simulados')->with('success', 'Simulado criado com sucesso!');
+    }
+
+    public function showSimulado($id)
+    {
+        $simuladoService = app(\App\Modules\Simulado\Services\SimuladoService::class);
+        $simulado = $simuladoService->getSimuladoById($id);
+        
+        return view('admin.simulados.show', compact('simulado'));
+    }
+
+    public function addPergunta(Request $request, $simuladoId)
+    {
+        $validatedData = $request->validate([
+            'pergunta' => 'required|string',
+            'tipo' => 'required|in:multipla_escolha,escolha_unica',
+            'opcoes' => 'required|array|min:2',
+            'respostas_corretas' => 'required|array|min:1',
+            'explicacao' => 'nullable|string',
+            'video_url' => 'nullable|url'
+        ]);
+
+        $simuladoService = app(\App\Modules\Simulado\Services\SimuladoService::class);
+        $simulado = $simuladoService->getSimuladoById($simuladoId);
+        $simuladoService->addPergunta($simulado, $validatedData);
+
+        return redirect()->route('admin.simulados.show', $simuladoId)
+            ->with('success', 'Pergunta adicionada com sucesso!');
+    }
 }

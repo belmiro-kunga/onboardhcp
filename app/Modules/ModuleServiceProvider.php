@@ -10,13 +10,14 @@ use App\Modules\Onboarding\Services\OnboardingService;
 
 class ModuleServiceProvider extends ServiceProvider
 {
-    public function register(): void
+    public function register()
     {
         // Registrar serviços como singletons
         $this->app->singleton(AuthService::class);
         $this->app->singleton(UserService::class);
-        $this->app->singleton(BirthdayService::class);
         $this->app->singleton(OnboardingService::class);
+        $this->app->singleton(BirthdayService::class);
+        $this->app->singleton(\App\Modules\Simulado\Services\SimuladoService::class);
     }
 
     public function boot(): void

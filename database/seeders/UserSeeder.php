@@ -8,57 +8,80 @@ use App\Modules\User\Models\User;
 
 class UserSeeder extends Seeder
 {
+    /**
+     * Run the database seeds.
+     */
     public function run(): void
     {
+        // Criar administrador principal
         User::create([
             'name' => 'Administrador',
-            'email' => 'admin@teste.com',
-            'password' => Hash::make('123456'),
-            'email_verified_at' => now(),
-            'birth_date' => '1985-03-15',
+            'email' => 'admin@hemeracapital.com',
+            'birth_date' => '1985-01-15',
+            'password' => Hash::make('admin123'),
             'is_admin' => true,
+            'email_verified_at' => now(),
         ]);
 
-        User::create([
-            'name' => 'Funcionário Teste',
-            'email' => 'funcionario@teste.com',
-            'password' => Hash::make('123456'),
-            'email_verified_at' => now(),
-            'birth_date' => '1990-07-22',
-        ]);
+        // Criar funcionários de exemplo
+        $funcionarios = [
+            [
+                'name' => 'João Silva',
+                'email' => 'joao.silva@hemeracapital.com',
+                'birth_date' => '1990-03-22',
+                'password' => Hash::make('password123'),
+                'is_admin' => false,
+            ],
+            [
+                'name' => 'Maria Santos',
+                'email' => 'maria.santos@hemeracapital.com',
+                'birth_date' => '1988-07-10',
+                'password' => Hash::make('password123'),
+                'is_admin' => false,
+            ],
+            [
+                'name' => 'Pedro Costa',
+                'email' => 'pedro.costa@hemeracapital.com',
+                'birth_date' => '1992-11-05',
+                'password' => Hash::make('password123'),
+                'is_admin' => false,
+            ],
+            [
+                'name' => 'Ana Ferreira',
+                'email' => 'ana.ferreira@hemeracapital.com',
+                'birth_date' => '1987-09-18',
+                'password' => Hash::make('password123'),
+                'is_admin' => false,
+            ],
+            [
+                'name' => 'Carlos Oliveira',
+                'email' => 'carlos.oliveira@hemeracapital.com',
+                'birth_date' => '1991-12-03',
+                'password' => Hash::make('password123'),
+                'is_admin' => false,
+            ],
+            [
+                'name' => 'Sofia Rodrigues',
+                'email' => 'sofia.rodrigues@hemeracapital.com',
+                'birth_date' => '1989-04-25',
+                'password' => Hash::make('password123'),
+                'is_admin' => false,
+            ],
+        ];
 
-        // Aniversariante do dia (usando a data atual)
-        User::create([
-            'name' => 'Maria Silva',
-            'email' => 'maria@hemeracapital.com',
-            'password' => Hash::make('123456'),
-            'email_verified_at' => now(),
-            'birth_date' => now()->format('Y') . '-' . now()->format('m-d'), // Aniversário hoje
-        ]);
+        foreach ($funcionarios as $funcionario) {
+            $funcionario['email_verified_at'] = now();
+            User::create($funcionario);
+        }
 
-        // Próximos aniversariantes
+        // Criar um segundo administrador
         User::create([
-            'name' => 'João Santos',
-            'email' => 'joao@hemeracapital.com',
-            'password' => Hash::make('123456'),
+            'name' => 'Super Admin',
+            'email' => 'superadmin@hemeracapital.com',
+            'birth_date' => '1980-06-12',
+            'password' => Hash::make('superadmin123'),
+            'is_admin' => true,
             'email_verified_at' => now(),
-            'birth_date' => now()->addDays(2)->format('Y') . '-' . now()->addDays(2)->format('m-d'),
-        ]);
-
-        User::create([
-            'name' => 'Ana Costa',
-            'email' => 'ana@hemeracapital.com',
-            'password' => Hash::make('123456'),
-            'email_verified_at' => now(),
-            'birth_date' => now()->addDays(5)->format('Y') . '-' . now()->addDays(5)->format('m-d'),
-        ]);
-
-        User::create([
-            'name' => 'Carlos Oliveira',
-            'email' => 'carlos@hemeracapital.com',
-            'password' => Hash::make('123456'),
-            'email_verified_at' => now(),
-            'birth_date' => now()->addDays(8)->format('Y') . '-' . now()->addDays(8)->format('m-d'),
         ]);
     }
 }
