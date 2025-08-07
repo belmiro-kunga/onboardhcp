@@ -6,9 +6,13 @@ use App\Models\CourseProgress;
 use App\Models\Video;
 use App\Models\Course;
 use App\Models\User;
+use App\Models\Enrollment;
+use App\Models\VideoView;
 use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Collection;
 
 class AnalyticsService
 {
@@ -73,6 +77,579 @@ class AnalyticsService
                 'details' => config('app.debug') ? $e->getMessage() : null
             ];
         }
+    }
+    /**
+     * Track video watch progress for a user
+     *
+     * @param int $userId
+     * @param int $videoId
+     * @param int $currentTime
+     * @param int $totalDuration
+     * @return array
+     */
+    /**
+     * Get analytics for a specific course
+     *
+     * @param Course $course
+     * @param string $startDate
+     * @param string $endDate
+     * @return array
+     */
+    public function getCourseAnalytics(Course $course, string $startDate, string $endDate): array
+    {
+        $start = Carbon::parse($startDate)->startOfDay();
+        $end = Carbon::parse($endDate)->endOfDay();
+        
+        // Get enrollment stats
+        $enrollments = $this->getEnrollmentStats($course, $start, $end);
+        
+        // Get completion stats
+        $completions = $this->getCompletionStats($course, $start, $end);
+        
+        // Get engagement metrics
+        $engagement = $this->getEngagementMetrics($course, $start, $end);
+        
+        // Get video analytics
+        $videoAnalytics = $this->getVideoAnalytics($course, $start, $end);
+        
+        return [
+            'enrollments' => $enrollments,
+            'completions' => $completions,
+            'engagement' => $engagement,
+            'video_analytics' => $videoAnalytics,
+        ];
+    }
+    
+    /**
+     * Get user progress in a course
+     *
+     * @param User $user
+     * @param Course $course
+     * @return array
+     */
+    public function getUserProgress(User $user, Course $course): array
+    {
+        $enrollment = $user->enrollments()
+            ->where('course_id', $course->id)
+            ->firstOrFail();
+            
+        $videos = $course->videos()
+            ->with(['progress' => function($query) use ($user) {
+                $query->where('user_id', $user->id);
+            }])
+            ->orderBy('position')
+            ->get();
+            
+        $totalVideos = $videos->count();
+        $completedVideos = $videos->filter(fn($video) => $video->progress?->completed_at)->count();
+        $completionPercentage = $totalVideos > 0 ? round(($completedVideos / $totalVideos) * 100) : 0;
+        
+        return [
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'enrolled_at' => $enrollment->created_at->toIso8601String(),
+            ],
+            'course' => [
+                'id' => $course->id,
+                'title' => $course->title,
+                'total_videos' => $totalVideos,
+                'total_duration' => $videos->sum('duration'),
+            ],
+            'progress' => [
+                'completed_videos' => $completedVideos,
+                'completion_percentage' => $completionPercentage,
+                'total_watch_time' => $videos->sum(fn($video) => $video->progress?->watch_time_seconds ?? 0),
+                'last_watched_at' => $videos->max('progress.last_watched_at')?->toIso8601String(),
+                'started_at' => $videos->min('progress.created_at')?->toIso8601String(),
+            ],
+            'videos' => $videos->map(function($video) {
+                return [
+                    'id' => $video->id,
+                    'title' => $video->title,
+                    'duration' => $video->duration,
+                    'position' => $video->position,
+                    'progress' => $video->progress ? [
+                        'progress_percentage' => $video->progress->progress_percentage,
+                        'watch_time_seconds' => $video->progress->watch_time_seconds,
+                        'completed_at' => $video->progress->completed_at?->toIso8601String(),
+                        'last_watched_at' => $video->progress->last_watched_at?->toIso8601String(),
+                    ] : null,
+                ];
+            })->toArray(),
+        ];
+    }
+    
+    /**
+     * Prepare progress report data for export
+     *
+     * @param Course $course
+     * @param bool $includeInactive
+     * @param string|null $statusFilter
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function prepareProgressReportData(Course $course, bool $includeInactive = false, ?string $statusFilter = null)
+    {
+        $query = $course->enrollments()
+            ->with(['user', 'progress'])
+            ->withCount([
+                'videos as completed_videos_count' => function($query) {
+                    $query->whereNotNull('completed_at');
+                },
+                'videos as total_videos_count',
+            ]);
+            
+        if (!$includeInactive) {
+            $query->where('status', 'active');
+        }
+        
+        if ($statusFilter) {
+            $query->where('status', $statusFilter);
+        }
+        
+        return $query->get()->map(function($enrollment) {
+            $enrollment->completion_percentage = $enrollment->total_videos_count > 0 
+                ? round(($enrollment->completed_videos_count / $enrollment->total_videos_count) * 100, 2)
+                : 0;
+                
+            $enrollment->videos_watched_count = $enrollment->progress->count();
+            $enrollment->last_activity_at = $enrollment->progress->max('last_watched_at');
+            
+            return $enrollment;
+        });
+    }
+    
+    /**
+     * Get dashboard statistics
+     *
+     * @param Carbon|null $startDate
+     * @return array
+     */
+    public function getDashboardStats(?Carbon $startDate = null): array
+    {
+        $startDate = $startDate ?: now()->subDays(30);
+        
+        $stats = [
+            'total_users' => User::count(),
+            'total_courses' => Course::count(),
+            'total_enrollments' => $this->getEnrollmentStats(null, $startDate, now()),
+            'completion_rates' => $this->getCompletionRates($startDate),
+            'recent_activity' => $this->getRecentActivity($startDate),
+            'popular_courses' => $this->getPopularCourses(5, $startDate),
+            'user_engagement' => $this->getUserEngagement($startDate),
+        ];
+        
+        return $stats;
+    }
+    
+    /**
+     * Get real-time updates for the dashboard
+     *
+     * @param array $channels
+     * @param string|null $lastUpdate
+     * @return array
+     */
+    public function getRealtimeUpdates(array $channels, ?string $lastUpdate = null): array
+    {
+        $updates = [];
+        $lastUpdateTime = $lastUpdate ? Carbon::parse($lastUpdate) : now()->subMinute();
+        
+        if (in_array('enrollments', $channels)) {
+            $updates['enrollments'] = $this->getRecentEnrollments($lastUpdateTime);
+        }
+        
+        if (in_array('completions', $channels)) {
+            $updates['completions'] = $this->getRecentCompletions($lastUpdateTime);
+        }
+        
+        if (in_array('activity', $channels)) {
+            $updates['activity'] = $this->getRecentActivity($lastUpdateTime, 10);
+        }
+        
+        return $updates;
+    }
+    
+    /**
+     * Get enrollment statistics
+     *
+     * @param Course|null $course
+     * @param Carbon $start
+     * @param Carbon $end
+     * @return array
+     */
+    protected function getEnrollmentStats(?Course $course, Carbon $start, Carbon $end): array
+    {
+        $query = Enrollment::query();
+        
+        if ($course) {
+            $query->where('course_id', $course->id);
+        }
+        
+        $total = (clone $query)->count();
+        
+        $recent = (clone $query)
+            ->whereBetween('created_at', [$start, $end])
+            ->count();
+            
+        $period = CarbonPeriod::create($start, $end);
+        $enrollmentsByDay = [];
+        
+        foreach ($period as $date) {
+            $count = (clone $query)
+                ->whereDate('created_at', $date)
+                ->count();
+                
+            $enrollmentsByDay[$date->format('Y-m-d')] = $count;
+        }
+        
+        return [
+            'total' => $total,
+            'recent' => $recent,
+            'by_day' => $enrollmentsByDay,
+        ];
+    }
+    
+    /**
+     * Get completion statistics
+     *
+     * @param Course $course
+     * @param Carbon $start
+     * @param Carbon $end
+     * @return array
+     */
+    protected function getCompletionStats(Course $course, Carbon $start, Carbon $end): array
+    {
+        $totalEnrollments = $course->enrollments()->count();
+        $completedEnrollments = $course->enrollments()
+            ->where('status', 'completed')
+            ->count();
+            
+        $completionRate = $totalEnrollments > 0 
+            ? round(($completedEnrollments / $totalEnrollments) * 100, 2)
+            : 0;
+            
+        $completionsByDay = [];
+        $period = CarbonPeriod::create($start, $end);
+        
+        foreach ($period as $date) {
+            $count = $course->enrollments()
+                ->where('status', 'completed')
+                ->whereDate('completed_at', $date)
+                ->count();
+                
+            $completionsByDay[$date->format('Y-m-d')] = $count;
+        }
+        
+        return [
+            'total_completions' => $completedEnrollments,
+            'completion_rate' => $completionRate,
+            'by_day' => $completionsByDay,
+        ];
+    }
+    
+    /**
+     * Get engagement metrics
+     *
+     * @param Course $course
+     * @param Carbon $start
+     * @param Carbon $end
+     * @return array
+     */
+    protected function getEngagementMetrics(Course $course, Carbon $start, Carbon $end): array
+    {
+        // Average watch time per video
+        $avgWatchTime = (int) $course->videos()
+            ->join('course_progress', 'videos.id', '=', 'course_progress.video_id')
+            ->whereBetween('course_progress.updated_at', [$start, $end])
+            ->avg('course_progress.watch_time_seconds');
+            
+        // Drop-off rate (users who started but didn't complete)
+        $startedCount = $course->enrollments()
+            ->where('status', '!=', 'completed')
+            ->whereHas('progress')
+            ->count();
+            
+        $dropOffRate = $course->enrollments_count > 0
+            ? round(($startedCount / $course->enrollments_count) * 100, 2)
+            : 0;
+            
+        // Time to complete (for completed enrollments)
+        $avgTimeToComplete = (int) $course->enrollments()
+            ->where('status', 'completed')
+            ->selectRaw('AVG(TIMESTAMPDIFF(SECOND, created_at, completed_at)) as avg_seconds')
+            ->value('avg_seconds');
+            
+        return [
+            'avg_watch_time_seconds' => $avgWatchTime,
+            'drop_off_rate' => $dropOffRate,
+            'avg_time_to_complete_seconds' => $avgTimeToComplete,
+        ];
+    }
+    
+    /**
+     * Get video analytics
+     *
+     * @param Course $course
+     * @param Carbon $start
+     * @param Carbon $end
+     * @return array
+     */
+    protected function getVideoAnalytics(Course $course, Carbon $start, Carbon $end): array
+    {
+        $videos = $course->videos()
+            ->withCount([
+                'views as view_count',
+                'completions as completion_count',
+            ])
+            ->withAvg('progress', 'watch_time_seconds')
+            ->orderBy('position')
+            ->get();
+            
+        return $videos->map(function($video) use ($start, $end) {
+            return [
+                'id' => $video->id,
+                'title' => $video->title,
+                'duration' => $video->duration,
+                'view_count' => $video->view_count,
+                'completion_count' => $video->completion_count,
+                'avg_watch_time' => (int) $video->progress_avg_watch_time_seconds,
+                'completion_rate' => $video->view_count > 0
+                    ? round(($video->completion_count / $video->view_count) * 100, 2)
+                    : 0,
+            ];
+        })->toArray();
+    }
+    
+    /**
+     * Get completion rates over time
+     *
+     * @param Carbon $start
+     * @param Carbon|null $end
+     * @return array
+     */
+    protected function getCompletionRates(Carbon $start, ?Carbon $end = null): array
+    {
+        $end = $end ?: now();
+        
+        $completions = CourseProgress::query()
+            ->select([
+                DB::raw('DATE(completed_at) as date'),
+                DB::raw('COUNT(DISTINCT user_id) as count'),
+            ])
+            ->whereNotNull('completed_at')
+            ->whereBetween('completed_at', [$start, $end])
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get()
+            ->pluck('count', 'date')
+            ->toArray();
+            
+        $enrollments = Enrollment::query()
+            ->select([
+                DB::raw('DATE(created_at) as date'),
+                DB::raw('COUNT(*) as count'),
+            ])
+            ->whereBetween('created_at', [$start, $end])
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get()
+            ->pluck('count', 'date')
+            ->toArray();
+            
+        $dates = array_unique(array_merge(
+            array_keys($completions),
+            array_keys($enrollments)
+        ));
+        
+        sort($dates);
+        
+        $rates = [];
+        $cumulativeEnrollments = 0;
+        $cumulativeCompletions = 0;
+        
+        foreach ($dates as $date) {
+            $cumulativeEnrollments += $enrollments[$date] ?? 0;
+            $cumulativeCompletions += $completions[$date] ?? 0;
+            
+            $rates[$date] = [
+                'enrollments' => $enrollments[$date] ?? 0,
+                'completions' => $completions[$date] ?? 0,
+                'cumulative_enrollments' => $cumulativeEnrollments,
+                'cumulative_completions' => $cumulativeCompletions,
+                'completion_rate' => $cumulativeEnrollments > 0
+                    ? round(($cumulativeCompletions / $cumulativeEnrollments) * 100, 2)
+                    : 0,
+            ];
+        }
+        
+        return $rates;
+    }
+    
+    /**
+     * Get recent activity
+     *
+     * @param Carbon $since
+     * @param int $limit
+     * @return array
+     */
+    protected function getRecentActivity(Carbon $since, int $limit = 20): array
+    {
+        $videoViews = VideoView::with(['user', 'video.course'])
+            ->where('created_at', '>=', $since)
+            ->orderBy('created_at', 'desc')
+            ->limit($limit)
+            ->get()
+            ->map(function($view) {
+                return [
+                    'type' => 'video_view',
+                    'user' => $view->user->only(['id', 'name', 'email']),
+                    'video' => $view->video->only(['id', 'title']),
+                    'course' => $view->video->course->only(['id', 'title']),
+                    'created_at' => $view->created_at->toIso8601String(),
+                    'watch_time' => $view->watch_time_seconds,
+                ];
+            });
+            
+        $completions = CourseProgress::with(['user', 'video.course'])
+            ->whereNotNull('completed_at')
+            ->where('completed_at', '>=', $since)
+            ->orderBy('completed_at', 'desc')
+            ->limit($limit)
+            ->get()
+            ->map(function($progress) {
+                return [
+                    'type' => 'video_completion',
+                    'user' => $progress->user->only(['id', 'name', 'email']),
+                    'video' => $progress->video->only(['id', 'title']),
+                    'course' => $progress->video->course->only(['id', 'title']),
+                    'created_at' => $progress->completed_at->toIso8601String(),
+                ];
+            });
+            
+        return $videoViews->concat($completions)
+            ->sortByDesc('created_at')
+            ->take($limit)
+            ->values()
+            ->toArray();
+    }
+    
+    /**
+     * Get popular courses
+     *
+     * @param int $limit
+     * @param Carbon|null $since
+     * @return array
+     */
+    protected function getPopularCourses(int $limit = 5, ?Carbon $since = null): array
+    {
+        $query = Course::query()
+            ->withCount(['enrollments', 'completions'])
+            ->withAvg('reviews', 'rating')
+            ->orderBy('enrollments_count', 'desc')
+            ->limit($limit);
+            
+        if ($since) {
+            $query->whereHas('enrollments', function($q) use ($since) {
+                $q->where('created_at', '>=', $since);
+            });
+        }
+        
+        return $query->get()
+            ->map(function($course) {
+                return [
+                    'id' => $course->id,
+                    'title' => $course->title,
+                    'enrollments_count' => $course->enrollments_count,
+                    'completions_count' => $course->completions_count,
+                    'completion_rate' => $course->enrollments_count > 0
+                        ? round(($course->completions_count / $course->enrollments_count) * 100, 2)
+                        : 0,
+                    'average_rating' => (float) $course->reviews_avg_rating,
+                ];
+            })
+            ->toArray();
+    }
+    
+    /**
+     * Get user engagement metrics
+     *
+     * @param Carbon $since
+     * @return array
+     */
+    protected function getUserEngagement(Carbon $since): array
+    {
+        $activeUsers = User::whereHas('videoViews', function($q) use ($since) {
+            $q->where('created_at', '>=', $since);
+        })->count();
+        
+        $totalUsers = User::count();
+        $engagementRate = $totalUsers > 0 ? round(($activeUsers / $totalUsers) * 100, 2) : 0;
+        
+        $avgSessionsPerUser = VideoView::where('created_at', '>=', $since)
+            ->select(DB::raw('COUNT(DISTINCT session_id) / COUNT(DISTINCT user_id) as avg_sessions'))
+            ->value('avg_sessions') ?: 0;
+            
+        $avgWatchTime = (int) VideoView::where('created_at', '>=', $since)
+            ->avg('watch_time_seconds');
+            
+        return [
+            'active_users' => $activeUsers,
+            'total_users' => $totalUsers,
+            'engagement_rate' => $engagementRate,
+            'avg_sessions_per_user' => round($avgSessionsPerUser, 2),
+            'avg_watch_time_seconds' => $avgWatchTime,
+        ];
+    }
+    
+    /**
+     * Get recent enrollments
+     *
+     * @param Carbon $since
+     * @param int $limit
+     * @return array
+     */
+    protected function getRecentEnrollments(Carbon $since, int $limit = 10): array
+    {
+        return Enrollment::with(['user', 'course'])
+            ->where('created_at', '>=', $since)
+            ->orderBy('created_at', 'desc')
+            ->limit($limit)
+            ->get()
+            ->map(function($enrollment) {
+                return [
+                    'user' => $enrollment->user->only(['id', 'name', 'email']),
+                    'course' => $enrollment->course->only(['id', 'title']),
+                    'enrolled_at' => $enrollment->created_at->toIso8601String(),
+                ];
+            })
+            ->toArray();
+    }
+    
+    /**
+     * Get recent course completions
+     *
+     * @param Carbon $since
+     * @param int $limit
+     * @return array
+     */
+    protected function getRecentCompletions(Carbon $since, int $limit = 10): array
+    {
+        return Enrollment::with(['user', 'course'])
+            ->where('status', 'completed')
+            ->where('completed_at', '>=', $since)
+            ->orderBy('completed_at', 'desc')
+            ->limit($limit)
+            ->get()
+            ->map(function($enrollment) {
+                return [
+                    'user' => $enrollment->user->only(['id', 'name', 'email']),
+                    'course' => $enrollment->course->only(['id', 'title']),
+                    'completed_at' => $enrollment->completed_at->toIso8601String(),
+                    'days_to_complete' => $enrollment->created_at->diffInDays($enrollment->completed_at),
+                ];
+            })
+            ->toArray();
     }
 
     /**
