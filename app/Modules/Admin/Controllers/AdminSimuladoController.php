@@ -176,6 +176,12 @@ class AdminSimuladoController extends Controller
 
     public function wizardFinalize(Request $request)
     {
+        // Verificar se é uma requisição AJAX (modal)
+        if ($request->ajax() || $request->wantsJson()) {
+            return $this->wizardFinalizeAjax($request);
+        }
+
+        // Processo original para wizard em páginas separadas
         $simuladoData = session('simulado_wizard');
         $perguntas = session('simulado_perguntas', []);
 
@@ -200,6 +206,65 @@ class AdminSimuladoController extends Controller
 
         return redirect()->route('admin.simulados')
             ->with('success', "Simulado '{$simulado->titulo}' criado com sucesso com " . count($perguntas) . " perguntas!");
+    }
+
+    private function wizardFinalizeAjax(Request $request)
+    {
+        try {
+            // Validar dados do simulado
+            $simuladoData = $request->validate([
+                'titulo' => 'required|string|max:255',
+                'descricao' => 'nullable|string',
+                'duracao_minutos' => 'required|integer|min:1',
+                'nota_aprovacao' => 'required|integer|min:1|max:100',
+                'ativo' => 'boolean',
+                'perguntas' => 'required|array|min:1',
+                'perguntas.*.pergunta' => 'required|string',
+                'perguntas.*.tipo' => 'required|in:escolha_unica,multipla_escolha',
+                'perguntas.*.opcoes' => 'required|array|min:2',
+                'perguntas.*.resposta_correta' => 'required|integer|min:0',
+                'perguntas.*.explicacao' => 'nullable|string'
+            ]);
+
+            // Criar o simulado
+            $simulado = $this->simuladoService->createSimulado([
+                'titulo' => $simuladoData['titulo'],
+                'descricao' => $simuladoData['descricao'],
+                'duracao_minutos' => $simuladoData['duracao_minutos'],
+                'nota_aprovacao' => $simuladoData['nota_aprovacao'],
+                'ativo' => $simuladoData['ativo'] ?? false
+            ]);
+
+            // Adicionar as perguntas
+            foreach ($simuladoData['perguntas'] as $index => $perguntaData) {
+                $this->simuladoService->addPergunta($simulado, [
+                    'pergunta' => $perguntaData['pergunta'],
+                    'tipo' => $perguntaData['tipo'],
+                    'opcoes' => $perguntaData['opcoes'],
+                    'respostas_corretas' => [$perguntaData['resposta_correta']],
+                    'explicacao' => $perguntaData['explicacao'],
+                    'ordem' => $index + 1
+                ]);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => "Simulado '{$simulado->titulo}' criado com sucesso com " . count($simuladoData['perguntas']) . " perguntas!",
+                'simulado_id' => $simulado->id
+            ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Dados inválidos.',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erro ao criar simulado: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     // Gestão de Perguntas
