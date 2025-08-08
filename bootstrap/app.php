@@ -13,7 +13,13 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
+            // 'performance' => \App\Http\Middleware\PerformanceMiddleware::class,
         ]);
+        
+        // Middleware de performance removido temporariamente para resolver erro de autoload
+        // $middleware->web(append: [
+        //     \App\Http\Middleware\PerformanceMiddleware::class,
+        // ]);
     })
     ->withProviders([
         \App\Modules\ModuleServiceProvider::class,

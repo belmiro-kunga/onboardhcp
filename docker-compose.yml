@@ -11,12 +11,24 @@ services:
     restart: unless-stopped
     working_dir: /var/www
     volumes:
-      - ./:/var/www
+      # Otimização: usar cached para melhor performance no macOS/Windows
+      - ./:/var/www:cached
       - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+      # Cache de vendor e node_modules para melhor performance
+      - vendor_cache:/var/www/vendor
+      - node_modules_cache:/var/www/node_modules
     networks:
       - laravel
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    # Otimizações de recursos
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
 
   webserver:
     image: nginx:alpine
@@ -25,12 +37,19 @@ services:
     ports:
       - "8000:80"
     volumes:
-      - ./:/var/www
+      - ./:/var/www:cached
       - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
     networks:
       - laravel
     depends_on:
       - app
+    # Otimizações de recursos
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
 
   db:
     image: mysql:8.0
@@ -50,6 +69,18 @@ services:
       - ./docker/mysql/my.cnf:/etc/mysql/my.cnf
     networks:
       - laravel
+    # Health check para melhor inicialização
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+    # Otimizações de recursos
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
@@ -69,6 +100,10 @@ services:
 
 volumes:
   dbdata:
+    driver: local
+  vendor_cache:
+    driver: local
+  node_modules_cache:
     driver: local
 
 networks:
