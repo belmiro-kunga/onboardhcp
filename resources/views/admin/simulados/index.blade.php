@@ -1,127 +1,162 @@
 <x-admin-layout title="Simulados" active-menu="simulados" page-title="Gestão de Simulados">
-    <!-- Page Header -->
-    <div class="flex items-center justify-between mb-6">
-        <div>
-            <h2 class="text-2xl font-bold text-gray-900">Gestão de Simulados</h2>
-            <p class="text-sm text-gray-600">Crie e gerencie simulados para os funcionários</p>
-        </div>
-        <div class="flex space-x-3">
-            <a href="{{ route('admin.simulados.create') }}" class="btn-secondary">
-                <svg class="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                </svg>
-                Criação Rápida
-            </a>
-            <button onclick="openWizardModal()" class="btn-primary">
-                <svg class="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                </svg>
-                Wizard Completo
-            </button>
+    <!-- Enhanced Page Header -->
+    <div class="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 rounded-2xl p-6 mb-8 text-white shadow-xl">
+        <div class="flex items-center justify-between">
+            <div>
+                <div class="flex items-center mb-2">
+                    <svg class="w-8 h-8 mr-3 text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                    </svg>
+                    <h2 class="text-3xl font-bold tracking-tight">🎯 Gestão de Simulados</h2>
+                </div>
+                <p class="text-blue-100 text-lg">Crie e gerencie simulados para os funcionários com ferramentas avançadas</p>
+            </div>
+            <div class="flex space-x-4">
+                <a href="{{ route('admin.simulados.create') }}" class="simulados-btn-secondary group">
+                    <svg class="w-5 h-5 mr-2 group-hover:rotate-90 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    ⚡ Criação Rápida
+                </a>
+                <button onclick="openWizardModal()" class="simulados-btn-primary group">
+                    <svg class="w-5 h-5 mr-2 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                    </svg>
+                    🧙‍♂️ Wizard Completo
+                </button>
+            </div>
         </div>
     </div>
 
-    <!-- Stats Cards -->
+    <!-- Enhanced Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div class="widget">
-            <div class="flex items-center justify-between">
+        <div class="simulados-stat-card bg-gradient-to-br from-blue-500 to-blue-600 text-white transform hover:scale-105 transition-all duration-300">
+            <div class="flex items-center justify-between mb-4">
                 <div>
-                    <p class="text-sm font-medium text-gray-600">Total de Simulados</p>
-                    <p class="text-sm text-gray-500">Simulados criados</p>
+                    <p class="text-blue-100 text-sm font-medium">Total de Simulados</p>
+                    <p class="text-blue-200 text-xs">Simulados criados</p>
+                </div>
+                <div class="bg-white/20 p-3 rounded-full">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                    </svg>
                 </div>
             </div>
-            <div class="flex items-center mt-4">
-                <svg class="w-8 h-8 text-blue-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                </svg>
-                <span class="text-2xl font-bold text-gray-900">{{ $estatisticas['total_simulados'] }}</span>
+            <div class="flex items-center">
+                <span class="text-3xl font-bold counter" data-target="{{ $estatisticas['total_simulados'] }}">0</span>
+                <span class="ml-2 text-sm bg-white/20 px-2 py-1 rounded-full">📝</span>
             </div>
         </div>
 
-        <div class="widget">
-            <div class="flex items-center justify-between">
+        <div class="simulados-stat-card bg-gradient-to-br from-green-500 to-emerald-600 text-white transform hover:scale-105 transition-all duration-300">
+            <div class="flex items-center justify-between mb-4">
                 <div>
-                    <p class="text-sm font-medium text-gray-600">Simulados Ativos</p>
-                    <p class="text-sm text-gray-500">Disponíveis para funcionários</p>
+                    <p class="text-green-100 text-sm font-medium">Simulados Ativos</p>
+                    <p class="text-green-200 text-xs">Disponíveis para funcionários</p>
+                </div>
+                <div class="bg-white/20 p-3 rounded-full">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
                 </div>
             </div>
-            <div class="flex items-center mt-4">
-                <svg class="w-8 h-8 text-green-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                <span class="text-2xl font-bold text-gray-900">{{ $estatisticas['simulados_ativos'] }}</span>
+            <div class="flex items-center">
+                <span class="text-3xl font-bold counter" data-target="{{ $estatisticas['simulados_ativos'] }}">0</span>
+                <span class="ml-2 text-sm bg-white/20 px-2 py-1 rounded-full">✅</span>
             </div>
         </div>
 
-        <div class="widget">
-            <div class="flex items-center justify-between">
+        <div class="simulados-stat-card bg-gradient-to-br from-purple-500 to-violet-600 text-white transform hover:scale-105 transition-all duration-300">
+            <div class="flex items-center justify-between mb-4">
                 <div>
-                    <p class="text-sm font-medium text-gray-600">Participações</p>
-                    <p class="text-sm text-gray-500">Total de tentativas</p>
+                    <p class="text-purple-100 text-sm font-medium">Participações</p>
+                    <p class="text-purple-200 text-xs">Total de tentativas</p>
+                </div>
+                <div class="bg-white/20 p-3 rounded-full">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                    </svg>
                 </div>
             </div>
-            <div class="flex items-center mt-4">
-                <svg class="w-8 h-8 text-purple-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
-                </svg>
-                <span class="text-2xl font-bold text-gray-900">{{ $estatisticas['total_tentativas'] }}</span>
+            <div class="flex items-center">
+                <span class="text-3xl font-bold counter" data-target="{{ $estatisticas['total_tentativas'] }}">0</span>
+                <span class="ml-2 text-sm bg-white/20 px-2 py-1 rounded-full">👥</span>
             </div>
         </div>
 
-        <div class="widget">
-            <div class="flex items-center justify-between">
+        <div class="simulados-stat-card bg-gradient-to-br from-amber-500 to-orange-600 text-white transform hover:scale-105 transition-all duration-300">
+            <div class="flex items-center justify-between mb-4">
                 <div>
-                    <p class="text-sm font-medium text-gray-600">Taxa de Aprovação</p>
-                    <p class="text-sm text-gray-500">Média geral</p>
+                    <p class="text-amber-100 text-sm font-medium">Taxa de Aprovação</p>
+                    <p class="text-amber-200 text-xs">Média de aprovações</p>
+                </div>
+                <div class="bg-white/20 p-3 rounded-full">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
+                    </svg>
                 </div>
             </div>
-            <div class="flex items-center mt-4">
-                <svg class="w-8 h-8 text-yellow-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
-                </svg>
-                <span class="text-2xl font-bold text-gray-900">{{ number_format($estatisticas['taxa_aprovacao'], 1) }}%</span>
+            <div class="flex items-center">
+                <span class="text-3xl font-bold counter" data-target="{{ number_format($estatisticas['taxa_aprovacao'], 1) }}">0</span>
+                <span class="text-xl font-bold">%</span>
+                <span class="ml-2 text-sm bg-white/20 px-2 py-1 rounded-full">⭐</span>
             </div>
         </div>
     </div>
 
-    <!-- Simulados List -->
-    <div class="card">
-        <div class="flex items-center justify-between mb-6">
-            <h3 class="text-lg font-semibold text-gray-900">Lista de Simulados</h3>
-            <p class="text-sm text-gray-500">{{ $simulados->count() }} simulado(s) encontrado(s)</p>
+    <!-- Enhanced Simulados List -->
+    <div class="simulados-table-card bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+        <div class="bg-gradient-to-r from-gray-50 to-blue-50 px-6 py-4 border-b border-gray-200">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <svg class="w-6 h-6 text-blue-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                    </svg>
+                    <h3 class="text-xl font-bold text-gray-900">📋 Lista de Simulados</h3>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                        {{ $simulados->count() }} simulado(s) encontrado(s)
+                    </span>
+                </div>
+            </div>
         </div>
+        <div class="p-6">
 
         @if($simulados->count() > 0)
             <div class="overflow-x-auto">
-                <table class="min-w-full">
-                    <thead class="bg-gray-50">
+                <table class="min-w-full simulados-table">
+                    <thead class="bg-gradient-to-r from-gray-100 to-gray-50">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Título</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Perguntas</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duração</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nota Mín.</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Criado em</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                            <th class="px-6 py-4 text-left text-sm font-bold text-gray-700 uppercase tracking-wider border-b-2 border-gray-200">
+                                📝 Título
+                            </th>
+                            <th class="px-6 py-4 text-left text-sm font-bold text-gray-700 uppercase tracking-wider border-b-2 border-gray-200">
+                                ⏱️ Duração
+                            </th>
+                            <th class="px-6 py-4 text-left text-sm font-bold text-gray-700 uppercase tracking-wider border-b-2 border-gray-200">
+                                🎯 Nota Aprovação
+                            </th>
+                            <th class="px-6 py-4 text-left text-sm font-bold text-gray-700 uppercase tracking-wider border-b-2 border-gray-200">
+                                📊 Status
+                            </th>
+                            <th class="px-6 py-4 text-left text-sm font-bold text-gray-700 uppercase tracking-wider border-b-2 border-gray-200">
+                                📅 Criado em
+                            </th>
+                            <th class="px-6 py-4 text-left text-sm font-bold text-gray-700 uppercase tracking-wider border-b-2 border-gray-200">
+                                ⚙️ Ações
+                            </th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
                         @foreach($simulados as $simulado)
-                        <tr class="hover:bg-gray-50">
+                        <tr class="simulados-table-row hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-all duration-300 border-b border-gray-100">
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div>
                                     <div class="text-sm font-medium text-gray-900">{{ $simulado->titulo }}</div>
                                     @if($simulado->descricao)
                                         <div class="text-sm text-gray-500">{{ Str::limit($simulado->descricao, 50) }}</div>
                                     @endif
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                <div class="flex items-center">
-                                    <svg class="w-4 h-4 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                    </svg>
-                                    {{ $simulado->total_perguntas }}
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -132,18 +167,18 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 @if($simulado->ativo)
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                    <span class="simulados-status-active inline-flex items-center px-3 py-1.5 rounded-full text-sm font-bold bg-gradient-to-r from-green-400 to-emerald-500 text-white shadow-lg">
+                                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                         </svg>
-                                        Ativo
+                                        ✅ Ativo
                                     </span>
                                 @else
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                                    <span class="simulados-status-inactive inline-flex items-center px-3 py-1.5 rounded-full text-sm font-bold bg-gradient-to-r from-red-400 to-red-500 text-white shadow-lg">
+                                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                         </svg>
-                                        Inativo
+                                        ❌ Inativo
                                     </span>
                                 @endif
                             </td>
@@ -864,6 +899,187 @@
                     const newUrl = window.location.pathname;
                     window.history.replaceState({}, document.title, newUrl);
                 }
+            });
+        </script>
+    </x-slot>
+    
+    <x-slot name="styles">
+        <style>
+            /* Enhanced Simulados Page Styles */
+            .simulados-stat-card {
+                padding: 1.5rem;
+                border-radius: 1rem;
+                box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+                backdrop-filter: blur(10px);
+                position: relative;
+                overflow: hidden;
+            }
+            
+            .simulados-stat-card::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: linear-gradient(45deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
+                pointer-events: none;
+            }
+            
+            .simulados-stat-card:hover {
+                box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.2), 0 10px 20px -5px rgba(0, 0, 0, 0.1);
+            }
+            
+            .counter {
+                transition: all 0.5s ease;
+            }
+            
+            /* Enhanced Button Styles */
+            .simulados-btn-primary {
+                background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+                color: white;
+                padding: 0.75rem 1.5rem;
+                border-radius: 0.75rem;
+                font-weight: 600;
+                box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3);
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                border: none;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+            }
+            
+            .simulados-btn-primary:hover {
+                background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+                transform: translateY(-2px);
+                box-shadow: 0 8px 25px rgba(251, 191, 36, 0.4);
+            }
+            
+            .simulados-btn-secondary {
+                background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%);
+                color: #374151;
+                padding: 0.75rem 1.5rem;
+                border-radius: 0.75rem;
+                font-weight: 600;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                backdrop-filter: blur(10px);
+            }
+            
+            .simulados-btn-secondary:hover {
+                background: linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.9) 100%);
+                transform: translateY(-2px);
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            }
+            
+            /* Enhanced Table Styles */
+            .simulados-table-card {
+                transition: all 0.3s ease;
+            }
+            
+            .simulados-table-card:hover {
+                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            }
+            
+            .simulados-table-row:hover {
+                transform: translateX(4px);
+                box-shadow: 0 4px 15px rgba(59, 130, 246, 0.1);
+            }
+            
+            .simulados-status-active {
+                animation: pulse-green 2s infinite;
+            }
+            
+            .simulados-status-inactive {
+                animation: pulse-red 2s infinite;
+            }
+            
+            @keyframes pulse-green {
+                0%, 100% {
+                    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
+                }
+                50% {
+                    box-shadow: 0 0 0 10px rgba(34, 197, 94, 0);
+                }
+            }
+            
+            @keyframes pulse-red {
+                0%, 100% {
+                    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+                }
+                50% {
+                    box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+                }
+            }
+            
+            /* Counter Animation */
+            @keyframes countUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+            
+            .counter {
+                animation: countUp 0.8s ease-out;
+            }
+            
+            /* Responsive Adjustments */
+            @media (max-width: 768px) {
+                .simulados-stat-card {
+                    padding: 1rem;
+                }
+                
+                .simulados-btn-primary,
+                .simulados-btn-secondary {
+                    padding: 0.5rem 1rem;
+                    font-size: 0.875rem;
+                }
+            }
+        </style>
+        
+        <script>
+            // Counter Animation
+            document.addEventListener('DOMContentLoaded', function() {
+                const counters = document.querySelectorAll('.counter');
+                
+                const animateCounters = () => {
+                    counters.forEach(counter => {
+                        const target = parseInt(counter.getAttribute('data-target'));
+                        const count = parseInt(counter.innerText);
+                        const increment = target / 100;
+                        
+                        if (count < target) {
+                            counter.innerText = Math.ceil(count + increment);
+                            setTimeout(() => animateCounters(), 20);
+                        } else {
+                            counter.innerText = target;
+                        }
+                    });
+                };
+                
+                // Start animation after a short delay
+                setTimeout(animateCounters, 500);
+                
+                // Add hover effects to stat cards
+                const statCards = document.querySelectorAll('.simulados-stat-card');
+                statCards.forEach(card => {
+                    card.addEventListener('mouseenter', function() {
+                        this.style.transform = 'translateY(-8px) scale(1.02)';
+                    });
+                    
+                    card.addEventListener('mouseleave', function() {
+                        this.style.transform = 'translateY(0) scale(1)';
+                    });
+                });
             });
         </script>
     </x-slot>

@@ -1,7 +1,22 @@
 <x-admin-layout title="Painel Administrativo" active-menu="dashboard" page-title="Painel Administrativo">
     <x-slot name="styles">
         <style>
-            /* Dashboard Specific Styles */
+            /* Enhanced Dashboard Styles */
+            .dashboard-stat-card {
+                @apply rounded-2xl p-6 shadow-xl border-0 relative overflow-hidden;
+                backdrop-filter: blur(10px);
+                box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            }
+            
+            .dashboard-stat-card:hover {
+                transform: translateY(-8px) scale(1.02);
+                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            }
+            
+            .dashboard-counter {
+                transition: all 0.3s ease;
+            }
+            
             .metric-card {
                 @apply bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300 hover:scale-105;
             }
@@ -71,8 +86,31 @@
             .animate-delay-300 { animation-delay: 0.3s; }
             .animate-delay-400 { animation-delay: 0.4s; }
             
+            /* Enhanced Animations */
+            @keyframes dashboardPulse {
+                0%, 100% { opacity: 1; }
+                50% { opacity: 0.8; }
+            }
+            
+            @keyframes dashboardFloat {
+                0%, 100% { transform: translateY(0px); }
+                50% { transform: translateY(-10px); }
+            }
+            
+            .dashboard-pulse {
+                animation: dashboardPulse 2s infinite;
+            }
+            
+            .dashboard-float {
+                animation: dashboardFloat 3s ease-in-out infinite;
+            }
+            
             /* Mobile Responsive */
             @media (max-width: 768px) {
+                .dashboard-stat-card {
+                    @apply p-4;
+                }
+                
                 .metric-card {
                     @apply p-4;
                 }
@@ -88,18 +126,36 @@
         </style>
     </x-slot>
 
-    <!-- Welcome Section -->
+    <!-- Enhanced Welcome Section -->
     <div class="mb-8 animate-fade-in-up">
-        <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-6 text-white">
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between">
-                <div>
-                    <h1 class="text-2xl md:text-3xl font-bold mb-2">Bem-vindo ao Painel Administrativo</h1>
-                    <p class="text-blue-100 text-sm md:text-base">Gerencie o sistema Hemera Capital Partners com facilidade</p>
+        <div class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-2xl p-8 text-white shadow-2xl relative overflow-hidden">
+            <!-- Background Pattern -->
+            <div class="absolute inset-0 opacity-10">
+                <div class="absolute inset-0" style="background-image: radial-gradient(circle at 25px 25px, rgba(255, 255, 255, 0.3) 2px, transparent 0); background-size: 50px 50px;"></div>
+            </div>
+            
+            <div class="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between">
+                <div class="flex items-center">
+                    <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mr-4 backdrop-blur-sm">
+                        <svg class="w-8 h-8 text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-3xl md:text-4xl font-bold mb-2 tracking-tight">📈 Painel Administrativo</h1>
+                        <p class="text-purple-100 text-lg">Gerencie o sistema Hemera Capital Partners com ferramentas avançadas</p>
+                    </div>
                 </div>
-                <div class="mt-4 md:mt-0">
-                    <div class="bg-white/20 backdrop-blur-sm rounded-lg p-3 text-center">
-                        <div class="text-2xl font-bold">{{ now()->format('H:i') }}</div>
-                        <div class="text-xs text-blue-100">{{ now()->format('d/m/Y') }}</div>
+                <div class="mt-6 md:mt-0 flex space-x-4">
+                    <div class="bg-white/20 backdrop-blur-xl rounded-2xl p-4 text-center border border-white/30">
+                        <div class="text-3xl font-bold">{{ now()->format('H:i') }}</div>
+                        <div class="text-sm text-purple-100">{{ now()->format('d/m/Y') }}</div>
+                        <div class="text-xs text-purple-200 mt-1">🕰️ Horário</div>
+                    </div>
+                    <div class="bg-white/20 backdrop-blur-xl rounded-2xl p-4 text-center border border-white/30">
+                        <div class="text-3xl font-bold">{{ Auth::user()->name ? substr(Auth::user()->name, 0, 1) : 'A' }}</div>
+                        <div class="text-sm text-purple-100">Admin</div>
+                        <div class="text-xs text-purple-200 mt-1">👤 Usuário</div>
                     </div>
                 </div>
             </div>
@@ -108,78 +164,98 @@
 
     <!-- Metrics Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
-        <!-- Total Users -->
-        <div class="metric-card animate-fade-in-up animate-delay-100" onclick="window.location.href='{{ route('admin.users') }}'">
-            <div class="flex items-center justify-between">
-                <div class="flex-1">
-                    <p class="text-sm font-medium text-gray-600 mb-2">Total de Utilizadores</p>
-                    <div class="metric-value" data-target="{{ $totalUsers }}">0</div>
-                    <div class="flex items-center mt-2">
-                        <span class="trend-positive metric-trend">↗ +12%</span>
-                        <span class="text-xs text-gray-500 ml-2">vs mês anterior</span>
-                    </div>
+        <!-- Enhanced Total Users Card -->
+        <div class="dashboard-stat-card bg-gradient-to-br from-blue-500 to-blue-600 text-white transform hover:scale-105 transition-all duration-300 cursor-pointer" onclick="window.location.href='{{ route('admin.users') }}'">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <p class="text-blue-100 text-sm font-medium">Total de Usuários</p>
+                    <p class="text-blue-200 text-xs">Registrados no sistema</p>
                 </div>
-                <div class="metric-icon bg-blue-100 group-hover:bg-blue-200">
-                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="bg-white/20 p-3 rounded-full">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
                     </svg>
                 </div>
             </div>
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <span class="text-3xl font-bold dashboard-counter" data-target="{{ $totalUsers ?? 0 }}">0</span>
+                    <span class="ml-2 text-sm bg-white/20 px-2 py-1 rounded-full">👥</span>
+                </div>
+                <div class="text-xs bg-green-400/20 text-green-100 px-2 py-1 rounded-full">
+                    ↗️ +12%
+                </div>
+            </div>
         </div>
 
-        <!-- Admins -->
-        <div class="metric-card animate-fade-in-up animate-delay-200">
-            <div class="flex items-center justify-between">
-                <div class="flex-1">
-                    <p class="text-sm font-medium text-gray-600 mb-2">Administradores</p>
-                    <div class="metric-value" data-target="{{ $totalAdmins }}">0</div>
-                    <div class="flex items-center mt-2">
-                        <span class="trend-neutral metric-trend">→ 0%</span>
-                        <span class="text-xs text-gray-500 ml-2">sem alterações</span>
-                    </div>
+        <!-- Enhanced Admins Card -->
+        <div class="dashboard-stat-card bg-gradient-to-br from-purple-500 to-violet-600 text-white transform hover:scale-105 transition-all duration-300">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <p class="text-purple-100 text-sm font-medium">Administradores</p>
+                    <p class="text-purple-200 text-xs">Usuários com privilégios</p>
                 </div>
-                <div class="metric-icon bg-purple-100 group-hover:bg-purple-200">
-                    <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="bg-white/20 p-3 rounded-full">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
                     </svg>
                 </div>
             </div>
-        </div>
-
-        <!-- Today Birthdays -->
-        <div class="metric-card animate-fade-in-up animate-delay-300">
             <div class="flex items-center justify-between">
-                <div class="flex-1">
-                    <p class="text-sm font-medium text-gray-600 mb-2">Aniversários Hoje</p>
-                    <div class="metric-value" data-target="{{ $todayBirthdays }}">0</div>
-                    <div class="flex items-center mt-2">
-                        <span class="trend-positive metric-trend">🎉 Celebrar!</span>
-                    </div>
+                <div class="flex items-center">
+                    <span class="text-3xl font-bold dashboard-counter" data-target="{{ $totalAdmins ?? 0 }}">0</span>
+                    <span class="ml-2 text-sm bg-white/20 px-2 py-1 rounded-full">🛡️</span>
                 </div>
-                <div class="metric-icon bg-yellow-100 group-hover:bg-yellow-200">
-                    <div class="text-2xl animate-bounce">🎂</div>
+                <div class="text-xs bg-gray-400/20 text-gray-100 px-2 py-1 rounded-full">
+                    ➡️ Estável
                 </div>
             </div>
         </div>
 
-        <!-- System Status -->
-        <div class="metric-card animate-fade-in-up animate-delay-400">
-            <div class="flex items-center justify-between">
-                <div class="flex-1">
-                    <p class="text-sm font-medium text-gray-600 mb-2">Estado do Sistema</p>
-                    <div class="flex items-center mb-2">
-                        <div class="w-3 h-3 bg-green-500 rounded-full mr-2 animate-pulse"></div>
-                        <span class="text-2xl font-bold text-green-600">Online</span>
-                    </div>
-                    <div class="flex items-center mt-2">
-                        <span class="trend-positive metric-trend">99.9%</span>
-                        <span class="text-xs text-gray-500 ml-2">uptime</span>
-                    </div>
+        <!-- Enhanced Today Birthdays Card -->
+        <div class="dashboard-stat-card bg-gradient-to-br from-amber-500 to-orange-600 text-white transform hover:scale-105 transition-all duration-300">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <p class="text-amber-100 text-sm font-medium">Aniversários Hoje</p>
+                    <p class="text-amber-200 text-xs">Celebrações do dia</p>
                 </div>
-                <div class="metric-icon bg-green-100 group-hover:bg-green-200">
-                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="bg-white/20 p-3 rounded-full animate-bounce">
+                    <div class="text-2xl">🎂</div>
+                </div>
+            </div>
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <span class="text-3xl font-bold dashboard-counter" data-target="{{ $todayBirthdays ?? 0 }}">0</span>
+                    <span class="ml-2 text-sm bg-white/20 px-2 py-1 rounded-full">🎉</span>
+                </div>
+                <div class="text-xs bg-yellow-400/20 text-yellow-100 px-2 py-1 rounded-full">
+                    🎆 Celebre!
+                </div>
+            </div>
+        </div>
+
+        <!-- Enhanced System Status Card -->
+        <div class="dashboard-stat-card bg-gradient-to-br from-green-500 to-emerald-600 text-white transform hover:scale-105 transition-all duration-300">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <p class="text-green-100 text-sm font-medium">Status do Sistema</p>
+                    <p class="text-green-200 text-xs">Monitoramento em tempo real</p>
+                </div>
+                <div class="bg-white/20 p-3 rounded-full">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
+                </div>
+            </div>
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <span class="text-3xl font-bold">100</span>
+                    <span class="text-xl font-bold">%</span>
+                    <span class="ml-2 text-sm bg-white/20 px-2 py-1 rounded-full">✅</span>
+                </div>
+                <div class="flex items-center text-xs bg-green-400/20 text-green-100 px-2 py-1 rounded-full">
+                    <div class="w-2 h-2 bg-green-300 rounded-full mr-2 animate-pulse"></div>
+                    Online
                 </div>
             </div>
         </div>
@@ -372,7 +448,34 @@
     <x-slot name="scripts">
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                // Animate counters
+                // Enhanced Dashboard Counter Animation
+                function animateDashboardCounters() {
+                    const counters = document.querySelectorAll('.dashboard-counter[data-target]');
+                    
+                    counters.forEach(counter => {
+                        const target = parseInt(counter.getAttribute('data-target')) || 0;
+                        const duration = 2000;
+                        const increment = target / 100;
+                        let current = 0;
+                        
+                        const timer = setInterval(() => {
+                            current += increment;
+                            if (current >= target) {
+                                counter.textContent = target;
+                                clearInterval(timer);
+                                // Add completion animation
+                                counter.classList.add('dashboard-pulse');
+                                setTimeout(() => {
+                                    counter.classList.remove('dashboard-pulse');
+                                }, 1000);
+                            } else {
+                                counter.textContent = Math.floor(current);
+                            }
+                        }, 20);
+                    });
+                }
+                
+                // Legacy counter animation for compatibility
                 function animateCounters() {
                     const counters = document.querySelectorAll('.metric-value[data-target]');
                     
@@ -406,10 +509,30 @@
                     });
                 }
                 
+                // Enhanced Card Hover Effects
+                function initializeDashboardEffects() {
+                    const statCards = document.querySelectorAll('.dashboard-stat-card');
+                    
+                    statCards.forEach(card => {
+                        card.addEventListener('mouseenter', function() {
+                            this.style.transform = 'translateY(-8px) scale(1.02)';
+                            this.classList.add('dashboard-float');
+                        });
+                        
+                        card.addEventListener('mouseleave', function() {
+                            this.style.transform = '';
+                            this.classList.remove('dashboard-float');
+                        });
+                    });
+                }
+                
                 // Initialize animations when elements come into view
                 const observer = new IntersectionObserver((entries) => {
                     entries.forEach(entry => {
                         if (entry.isIntersecting) {
+                            if (entry.target.classList.contains('dashboard-counter')) {
+                                animateDashboardCounters();
+                            }
                             if (entry.target.classList.contains('metric-value')) {
                                 animateCounters();
                             }
@@ -421,7 +544,15 @@
                     });
                 });
                 
-                // Observe counter elements
+                // Initialize dashboard effects
+                initializeDashboardEffects();
+                
+                // Observe enhanced dashboard counters
+                document.querySelectorAll('.dashboard-counter[data-target]').forEach(counter => {
+                    observer.observe(counter);
+                });
+                
+                // Observe legacy counter elements
                 document.querySelectorAll('.metric-value[data-target]').forEach(counter => {
                     observer.observe(counter);
                 });
@@ -431,26 +562,38 @@
                     observer.observe(bar);
                 });
                 
-                // Real-time activity feed simulation
+                // Enhanced Real-time Activity Feed
                 function updateActivityFeed() {
                     const activities = [
                         {
                             icon: 'user',
                             color: 'blue',
-                            title: 'Novo utilizador registado',
+                            title: '👤 Novo usuário registrado',
                             subtitle: 'Maria Santos • agora'
                         },
                         {
                             icon: 'check',
                             color: 'green',
-                            title: 'Simulado completado',
+                            title: '✅ Simulado completado',
                             subtitle: 'João Silva • há 1 minuto'
                         },
                         {
                             icon: 'document',
                             color: 'purple',
-                            title: 'Relatório gerado',
+                            title: '📊 Relatório gerado',
                             subtitle: 'Sistema • há 2 minutos'
+                        },
+                        {
+                            icon: 'birthday',
+                            color: 'yellow',
+                            title: '🎂 Aniversário hoje',
+                            subtitle: 'Ana Costa • celebrando'
+                        },
+                        {
+                            icon: 'admin',
+                            color: 'red',
+                            title: '🛡️ Acesso administrativo',
+                            subtitle: 'Pedro Lima • há 3 minutos'
                         }
                     ];
                     
