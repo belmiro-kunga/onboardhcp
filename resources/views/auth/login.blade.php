@@ -783,6 +783,25 @@
     }
 }
 
+/* Para telas muito pequenas, manter vertical */
+@media (max-width: 400px) {
+    .layout-container {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .birthday-section {
+        order: -1; /* Aniversários no topo em telas muito pequenas */
+    }
+    
+    .login-section,
+    .birthday-section {
+        flex: none;
+        min-width: auto;
+        width: 100%;
+    }
+}
+
 @media (max-width: 768px) {
     .geometric-shape {
         opacity: var(--geometric-shape-opacity-mobile);
@@ -802,14 +821,21 @@
         height: 6px;
     }
     
-    /* Mobile: stack vertically */
+    /* Manter layout horizontal mesmo em mobile */
     .layout-container {
-        flex-direction: column;
+        flex-direction: row;
         gap: var(--layout-gap-mobile);
+        align-items: flex-start;
+    }
+    
+    .login-section {
+        flex: 1.2;
+        min-width: 280px;
     }
     
     .birthday-section {
-        order: -1; /* Birthday section on top on mobile */
+        flex: 0.8;
+        min-width: 240px;
     }
     
     .login-form {
