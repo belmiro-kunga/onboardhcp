@@ -35,8 +35,7 @@ class UserGroup extends Model
      */
     public function permissions(): BelongsToMany
     {
-        return $this->belongsToMany(Permission::class, 'group_permission')
-            ->withPivot('course_id')
+        return $this->belongsToMany(Permission::class, 'group_permission', 'group_id', 'permission_id')
             ->withTimestamps();
     }
 
@@ -100,12 +99,7 @@ class UserGroup extends Model
      */
     public function assignPermissions(array $permissionIds, ?int $courseId = null): array
     {
-        $permissions = [];
-        foreach ($permissionIds as $permissionId) {
-            $permissions[$permissionId] = $courseId ? ['course_id' => $courseId] : [];
-        }
-        
-        $this->permissions()->syncWithoutDetach($permissions);
+        $this->permissions()->syncWithoutDetaching($permissionIds);
         
         // Clear permission cache for all users in this group
         $this->clearGroupPermissionCache();

@@ -14,6 +14,14 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Rotas administrativas (login separado)
 Route::prefix('admin')->group(function () {
+    // Rota raiz do admin - redireciona baseado na autenticação
+    Route::get('/', function () {
+        if (auth()->check() && auth()->user()->is_admin) {
+            return redirect()->route('admin.dashboard');
+        }
+        return redirect()->route('admin.login');
+    })->name('admin.index');
+    
     Route::get('/login', [AdminController::class, 'showLoginForm'])->name('admin.login');
     Route::post('/login', [AdminController::class, 'login']);
 });
@@ -22,6 +30,17 @@ Route::prefix('admin')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/funcionario', [OnboardingController::class, 'index'])->name('funcionario');
     Route::post('/funcionario/complete/{step}', [OnboardingController::class, 'completeStep'])->name('funcionario.complete');
+    
+    // Rotas de Onboarding
+    Route::prefix('onboarding')->name('onboarding.')->group(function () {
+        Route::get('/', [OnboardingController::class, 'onboardingIndex'])->name('index');
+        Route::get('/boas-vindas', [OnboardingController::class, 'boasVindas'])->name('boas-vindas');
+        Route::get('/sobre-empresa', [OnboardingController::class, 'sobreEmpresa'])->name('sobre-empresa');
+        Route::get('/historia', [OnboardingController::class, 'historia'])->name('historia');
+        Route::get('/departamentos', [OnboardingController::class, 'departamentos'])->name('departamentos');
+        Route::get('/cultura-valores', [OnboardingController::class, 'culturaValores'])->name('cultura-valores');
+        Route::get('/organograma', [OnboardingController::class, 'organograma'])->name('organograma');
+    });
     
     // Rotas de Simulados para Funcionários
     Route::prefix('simulados')->group(function () {
@@ -37,6 +56,10 @@ Route::middleware('auth')->group(function () {
 // Rotas protegidas para administradores
 Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+    
+    // Rotas de perfil
+    Route::get('/profile', [AdminController::class, 'profile'])->name('profile.edit');
+    Route::put('/profile', [AdminController::class, 'updateProfile'])->name('profile.update');
     Route::get('/users', [AdminController::class, 'users'])->name('admin.users');
     Route::post('/users', [AdminController::class, 'createUser'])->name('admin.users.create');
     Route::put('/users/{user}', [AdminController::class, 'updateUser'])->name('admin.users.update');
@@ -72,8 +95,32 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     // Manter rota simples para compatibilidade
     Route::get('/simulados', [\App\Modules\Admin\Controllers\AdminSimuladoController::class, 'index'])->name('admin.simulados');
     
-    // Outras rotas administrativas
+    // Rotas de vídeos com CRUD completo
+    Route::prefix('videos')->name('admin.videos.')->group(function () {
+        Route::get('/', [AdminController::class, 'videos'])->name('index');
+        Route::get('/create', [AdminController::class, 'videosCreate'])->name('create');
+        Route::post('/', [AdminController::class, 'videosStore'])->name('store');
+        Route::get('/{id}', [AdminController::class, 'videosShow'])->name('show');
+        Route::get('/{id}/edit', [AdminController::class, 'videosEdit'])->name('edit');
+        Route::put('/{id}', [AdminController::class, 'videosUpdate'])->name('update');
+        Route::delete('/{id}', [AdminController::class, 'videosDestroy'])->name('destroy');
+    });
+    
+    // Manter rota simples para compatibilidade
     Route::get('/videos', [AdminController::class, 'videos'])->name('admin.videos');
+    
+    // Rotas de cursos com CRUD completo
+    Route::prefix('courses')->name('admin.courses.')->group(function () {
+        Route::get('/', [AdminController::class, 'courses'])->name('index');
+        Route::get('/create', [AdminController::class, 'coursesCreate'])->name('create');
+        Route::post('/', [AdminController::class, 'coursesStore'])->name('store');
+        Route::get('/{id}', [AdminController::class, 'coursesShow'])->name('show');
+        Route::get('/{id}/edit', [AdminController::class, 'coursesEdit'])->name('edit');
+        Route::put('/{id}', [AdminController::class, 'coursesUpdate'])->name('update');
+        Route::delete('/{id}', [AdminController::class, 'coursesDestroy'])->name('destroy');
+    });
+    
+    // Outras rotas administrativas
     Route::get('/atribuicoes', [AdminController::class, 'atribuicoes'])->name('admin.atribuicoes');
     Route::get('/gamificacao', [AdminController::class, 'gamificacao'])->name('admin.gamificacao');
     Route::get('/analytics', [AdminController::class, 'analytics'])->name('admin.analytics');

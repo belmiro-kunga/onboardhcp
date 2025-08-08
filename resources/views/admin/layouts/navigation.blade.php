@@ -15,7 +15,7 @@
                     <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
-                    <x-nav-link :href="route('admin.videos.index')" :active="request()->routeIs('admin.videos.*')">
+                    <x-nav-link :href="route('admin.videos')" :active="request()->routeIs('admin.videos*')">
                         {{ __('Vídeos') }}
                     </x-nav-link>
                     <x-nav-link :href="route('admin.courses.index')" :active="request()->routeIs('admin.courses.*')">
@@ -72,7 +72,7 @@
             <x-responsive-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('admin.videos.index')" :active="request()->routeIs('admin.videos.*')">
+            <x-responsive-nav-link :href="route('admin.videos')" :active="request()->routeIs('admin.videos*')">
                 {{ __('Vídeos') }}
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('admin.courses.index')" :active="request()->routeIs('admin.courses.*')">
@@ -96,9 +96,9 @@
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
 
-                    <x-responsive-nav-link :href="route('logout')
-                                    onclick='event.preventDefault();
-                                                this.closest("form").submit();'>
+                    <x-responsive-nav-link :href="route('logout')"
+                                    onclick="event.preventDefault();
+                                                this.closest('form').submit();">
                         {{ __('Sair') }}
                     </x-responsive-nav-link>
                 </form>

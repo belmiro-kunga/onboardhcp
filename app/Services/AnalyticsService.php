@@ -944,3 +944,103 @@ class AnalyticsService
         return sprintf('%02d:%02d:%02d', $hours, $minutes, $secs);
     }
 }
+    /**
+     * Get course completion stats for admin dashboard
+     *
+     * @return array
+     */
+    public function getCourseCompletionStats(): array
+    {
+        try {
+            $totalCourses = Course::count();
+            $totalEnrollments = DB::table('course_progress')->distinct('user_id')->count();
+            $totalCompletions = DB::table('course_progress')
+                ->where('progress_percentage', '>=', 95)
+                ->distinct('user_id')
+                ->count();
+            
+            $completionRate = $totalEnrollments > 0 
+                ? round(($totalCompletions / $totalEnrollments) * 100, 2) 
+                : 0;
+            
+            return [
+                'total_courses' => $totalCourses,
+                'total_enrollments' => $totalEnrollments,
+                'total_completions' => $totalCompletions,
+                'completion_rate' => $completionRate
+            ];
+            
+        } catch (\Exception $e) {
+            \Log::error('Error getting course completion stats', [
+                'error' => $e->getMessage()
+            ]);
+            
+            return [
+                'total_courses' => 0,
+                'total_enrollments' => 0,
+                'total_completions' => 0,
+                'completion_rate' => 0
+            ];
+        }
+    }
+
+    /**
+     * Get engagement metrics for admin dashboard
+     *
+     * @return array
+     */
+    public function getEngagementMetrics(): array
+    {
+        try {
+            $totalUsers = User::count();
+            $activeUsers = DB::table('course_progress')
+                ->where('last_watched_at', '>=', now()->subDays(30))
+                ->distinct('user_id')
+                ->count();
+            
+            $engagementRate = $totalUsers > 0 
+                ? round(($activeUsers / $totalUsers) * 100, 2) 
+                : 0;
+            
+            $avgWatchTime = DB::table('course_progress')
+                ->where('last_watched_at', '>=', now()->subDays(30))
+                ->avg('watch_time_seconds') ?? 0;
+            
+            return [
+                'total_users' => $totalUsers,
+                'active_users' => $activeUsers,
+                'engagement_rate' => $engagementRate,
+                'avg_watch_time_seconds' => round($avgWatchTime),
+                'avg_watch_time_formatted' => $this->formatSeconds($avgWatchTime)
+            ];
+            
+        } catch (\Exception $e) {
+            \Log::error('Error getting engagement metrics', [
+                'error' => $e->getMessage()
+            ]);
+            
+            return [
+                'total_users' => 0,
+                'active_users' => 0,
+                'engagement_rate' => 0,
+                'avg_watch_time_seconds' => 0,
+                'avg_watch_time_formatted' => '00:00:00'
+            ];
+        }
+    }
+
+    /**
+     * Format seconds to HH:MM:SS
+     *
+     * @param int $seconds
+     * @return string
+     */
+    private function formatSeconds(int $seconds): string
+    {
+        $hours = floor($seconds / 3600);
+        $minutes = floor(($seconds % 3600) / 60);
+        $seconds = $seconds % 60;
+        
+        return sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds);
+    }
+}

@@ -32,99 +32,14 @@
         </div>
     </div>
     
-    <div class="w-full relative z-10 px-4">
-        <div class="layout-container max-w-6xl mx-auto">
-            <!-- Birthday Section - Posicionada no topo -->
-            <div class="birthday-section">
-                <!-- Aniversariantes do Dia -->
-                <div class="card mb-6 relative overflow-hidden">
-                    <!-- Animação de Confetes -->
-                    <div class="absolute inset-0 pointer-events-none">
-                        <div class="confetti-container">
-                            @for($i = 0; $i < 20; $i++)
-                                <div class="confetti confetti-{{ $i % 5 + 1 }}"></div>
-                            @endfor
-                        </div>
-                    </div>
-                    
-                    <div class="text-center relative z-10">
-                        <div class="animate-bounce mb-4">
-                            <div class="w-16 h-16 mx-auto bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
-                                <span class="text-2xl">🎂</span>
-                            </div>
-                        </div>
-                        <h3 class="text-lg font-bold text-gray-800 mb-2">🎉 Aniversariante do Dia!</h3>
-                        
-                        <div class="mb-4 p-4 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg">
-                            <div class="w-12 h-12 mx-auto mb-2 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white font-bold">
-                                M
-                            </div>
-                            <p class="font-semibold text-gray-800 animate-pulse">Maria Silva</p>
-                            <p class="text-sm text-gray-600">
-                                28 anos
-                            </p>
-                            <div class="mt-2 text-xs text-gray-500">
-                                🎈 Parabéns! 🎈
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Próximos Aniversariantes -->
-                <div class="card">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4 text-center">
-                        📅 Próximos Aniversários
-                    </h3>
-                    
-                    <div class="space-y-3">
-                        <div class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                            <div class="w-10 h-10 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold mr-3">
-                                J
-                            </div>
-                            <div class="flex-1">
-                                <p class="font-medium text-gray-800 text-sm">João Santos</p>
-                                <p class="text-xs text-gray-600">
-                                    15/08 - 7 dias
-                                </p>
-                            </div>
-                            <div class="text-lg">🎂</div>
-                        </div>
-                        
-                        <div class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                            <div class="w-10 h-10 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center text-white font-semibold mr-3">
-                                A
-                            </div>
-                            <div class="flex-1">
-                                <p class="font-medium text-gray-800 text-sm">Ana Costa</p>
-                                <p class="text-xs text-gray-600">
-                                    22/08 - 14 dias
-                                </p>
-                            </div>
-                            <div class="text-lg">🎂</div>
-                        </div>
-                        
-                        <div class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                            <div class="w-10 h-10 bg-gradient-to-r from-purple-400 to-pink-500 rounded-full flex items-center justify-center text-white font-semibold mr-3">
-                                P
-                            </div>
-                            <div class="flex-1">
-                                <p class="font-medium text-gray-800 text-sm">Pedro Lima</p>
-                                <p class="text-xs text-gray-600">
-                                    28/08 - 20 dias
-                                </p>
-                            </div>
-                            <div class="text-lg">🎂</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
+    <div class="w-full relative z-10 px-4 flex items-center justify-center min-h-screen">
+        <div class="layout-container max-w-md mx-auto">
             <!-- Login Form -->
             <div class="login-section">
-                <div class="login-card bg-white/95 backdrop-blur-enhanced border border-gray-200/50 rounded-2xl p-8 shadow-card transform hover:scale-[1.02] transition-all duration-300">
+                <div class="login-card bg-white/95 backdrop-blur-enhanced border border-gray-200/50 rounded-2xl p-6 shadow-card transform hover:scale-[1.02] transition-all duration-300">
                 <!-- Logo/Header -->
-                <div class="text-center mb-8">
-                    <div class="logo-container mb-6">
+                <div class="text-center mb-6">
+                    <div class="logo-container mb-4">
                         <div class="w-16 h-16 mx-auto mb-4 rounded-xl bg-gradient-enhanced flex items-center justify-center shadow-enhanced transform hover:rotate-6 transition-all duration-300">
                             <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
@@ -468,84 +383,29 @@
     transform: translateY(-2px) scale(1.02);
 }
 
-/* Enhanced Layout Container for Optimal Horizontal Distribution */
+/* Enhanced Layout Container for Centered Login Form */
 .layout-container {
     display: flex;
-    flex-direction: row;
-    gap: var(--layout-gap-desktop);
-    align-items: flex-start;
-    justify-content: space-between;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     width: 100%;
-    max-width: 1200px;
+    max-width: 380px;
     margin: 0 auto;
     box-sizing: border-box;
-    min-height: 600px;
-    padding-top: 2rem;
+    min-height: auto;
+    padding: 0;
 }
 
 /* Responsive Layout Adjustments */
-@media (max-width: 1024px) {
-    .layout-container {
-        flex-direction: row;
-        align-items: flex-start;
-        gap: 1.5rem;
-        padding-top: 1rem;
-    }
-    
-    .birthday-section {
-        width: 300px;
-        max-width: 300px;
-        min-width: 250px;
-        order: 1;
-    }
-    
-    .login-section {
-        width: 400px;
-        max-width: 400px;
-        min-width: 350px;
-        order: 2;
-    }
-}
-
 @media (max-width: 768px) {
     .layout-container {
-        flex-direction: row;
-        align-items: flex-start;
-        gap: 1rem;
+        max-width: 100%;
         padding: 0 1rem;
-        padding-top: 1rem;
-    }
-    
-    .birthday-section {
-        width: 280px;
-        max-width: 280px;
-        min-width: 220px;
-        order: 1;
     }
     
     .login-section {
-        width: 350px;
-        max-width: 350px;
-        min-width: 300px;
-        order: 2;
-    }
-}
-
-/* Additional constraints for ultra-wide screens */
-@media (min-width: 1400px) {
-    .layout-container {
-        gap: 3rem;
-        max-width: 1400px;
-    }
-    
-    .login-section {
-        width: 500px;
-        max-width: 500px;
-    }
-    
-    .birthday-section {
-        width: 400px;
-        max-width: 400px;
+        width: 100%;
     }
 }
 

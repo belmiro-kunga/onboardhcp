@@ -153,8 +153,47 @@ class AdminController extends Controller
 
     public function deleteUser(User $user)
     {
-        $this->userService->deleteUser($user);
-        return redirect()->route('admin.users')->with('success', 'Utilizador eliminado com sucesso!');
+        $user->delete();
+        return response()->json(['success' => true]);
+    }
+
+    /**
+     * Display the profile edit page
+     *
+     * @return \Illuminate\View\View
+     */
+    public function profile()
+    {
+        $user = auth()->user();
+        return view('admin.profile.edit', compact('user'));
+    }
+
+    /**
+     * Update the user's profile information
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function updateProfile(Request $request)
+    {
+        $user = auth()->user();
+        
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email,' . $user->id,
+            'password' => 'nullable|string|min:8|confirmed',
+        ]);
+
+        $user->name = $validatedData['name'];
+        $user->email = $validatedData['email'];
+        
+        if (!empty($validatedData['password'])) {
+            $user->password = bcrypt($validatedData['password']);
+        }
+        
+        $user->save();
+
+        return redirect()->route('profile.edit')->with('status', 'Perfil atualizado com sucesso!');
     }
 
     public function simulados()
@@ -247,16 +286,474 @@ class AdminController extends Controller
     }
     
     /**
-     * Display the course assignments page
+     * Show the form for creating a new video
+     */
+    public function videosCreate()
+    {
+        try {
+            // Get courses if available for video assignment
+            $courses = [];
+            if (class_exists(\App\Services\CourseService::class)) {
+                $courseService = app(\App\Services\CourseService::class);
+                if (method_exists($courseService, 'getAllCourses')) {
+                    $courses = $courseService->getAllCourses();
+                }
+            }
+            
+            return view('admin.videos.create', compact('courses'));
+            
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Error in AdminController@videosCreate', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return redirect()->route('admin.videos.index')
+                ->with('error', 'Erro ao carregar o formulário de criação de vídeo.');
+        }
+    }
+    
+    /**
+     * Store a newly created video in storage
+     */
+    public function videosStore(Request $request)
+    {
+        try {
+            $videoService = app(\App\Services\VideoService::class);
+            
+            // Basic validation
+            $request->validate([
+                'title' => 'required|string|max:255',
+                'description' => 'nullable|string',
+                'url' => 'required|url',
+                'course_id' => 'nullable|integer'
+            ]);
+            
+            $videoData = [
+                'title' => $request->title,
+                'description' => $request->description,
+                'url' => $request->url,
+                'course_id' => $request->course_id,
+                'created_at' => now(),
+                'updated_at' => now()
+            ];
+            
+            if (method_exists($videoService, 'createVideo')) {
+                $videoService->createVideo($videoData);
+            }
+            
+            return redirect()->route('admin.videos.index')
+                ->with('success', 'Vídeo criado com sucesso!');
+                
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Error in AdminController@videosStore', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return redirect()->back()
+                ->with('error', 'Erro ao criar o vídeo. Tente novamente.')
+                ->withInput();
+        }
+    }
+    
+    /**
+     * Display the specified video
+     */
+    public function videosShow($id)
+    {
+        try {
+            $videoService = app(\App\Services\VideoService::class);
+            
+            if (method_exists($videoService, 'getVideoById')) {
+                $video = $videoService->getVideoById($id);
+            } else {
+                $videos = $videoService->getAllVideos();
+                $video = $videos->firstWhere('id', $id);
+            }
+            
+            if (!$video) {
+                return redirect()->route('admin.videos.index')
+                    ->with('error', 'Vídeo não encontrado.');
+            }
+            
+            return view('admin.videos.show', compact('video'));
+            
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Error in AdminController@videosShow', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return redirect()->route('admin.videos.index')
+                ->with('error', 'Erro ao carregar o vídeo.');
+        }
+    }
+    
+    /**
+     * Show the form for editing the specified video
+     */
+    public function videosEdit($id)
+    {
+        try {
+            $videoService = app(\App\Services\VideoService::class);
+            
+            if (method_exists($videoService, 'getVideoById')) {
+                $video = $videoService->getVideoById($id);
+            } else {
+                $videos = $videoService->getAllVideos();
+                $video = $videos->firstWhere('id', $id);
+            }
+            
+            if (!$video) {
+                return redirect()->route('admin.videos.index')
+                    ->with('error', 'Vídeo não encontrado.');
+            }
+            
+            // Get courses if available
+            $courses = [];
+            if (class_exists(\App\Services\CourseService::class)) {
+                $courseService = app(\App\Services\CourseService::class);
+                if (method_exists($courseService, 'getAllCourses')) {
+                    $courses = $courseService->getAllCourses();
+                }
+            }
+            
+            return view('admin.videos.edit', compact('video', 'courses'));
+            
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Error in AdminController@videosEdit', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return redirect()->route('admin.videos.index')
+                ->with('error', 'Erro ao carregar o formulário de edição.');
+        }
+    }
+    
+    /**
+     * Update the specified video in storage
+     */
+    public function videosUpdate(Request $request, $id)
+    {
+        try {
+            $videoService = app(\App\Services\VideoService::class);
+            
+            // Basic validation
+            $request->validate([
+                'title' => 'required|string|max:255',
+                'description' => 'nullable|string',
+                'url' => 'required|url',
+                'course_id' => 'nullable|integer'
+            ]);
+            
+            $videoData = [
+                'title' => $request->title,
+                'description' => $request->description,
+                'url' => $request->url,
+                'course_id' => $request->course_id,
+                'updated_at' => now()
+            ];
+            
+            if (method_exists($videoService, 'updateVideo')) {
+                $videoService->updateVideo($id, $videoData);
+            }
+            
+            return redirect()->route('admin.videos.index')
+                ->with('success', 'Vídeo atualizado com sucesso!');
+                
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Error in AdminController@videosUpdate', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return redirect()->back()
+                ->with('error', 'Erro ao atualizar o vídeo. Tente novamente.')
+                ->withInput();
+        }
+    }
+    
+    /**
+     * Remove the specified video from storage
+     */
+    public function videosDestroy($id)
+    {
+        try {
+            $videoService = app(\App\Services\VideoService::class);
+            
+            if (method_exists($videoService, 'deleteVideo')) {
+                $videoService->deleteVideo($id);
+            }
+            
+            return redirect()->route('admin.videos.index')
+                ->with('success', 'Vídeo removido com sucesso!');
+                
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Error in AdminController@videosDestroy', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return redirect()->route('admin.videos.index')
+                ->with('error', 'Erro ao remover o vídeo.');
+        }
+    }
+    
+    /**
+     * Display the courses management page
+     *
+     * @return \Illuminate\View\View
+     */
+    public function courses()
+    {
+        try {
+            $courseService = app(\App\Services\CourseService::class);
+            $courses = $courseService->getAllCourses();
+            
+            return view('admin.courses.index', compact('courses'));
+            
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Error in AdminController@courses', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            // Return an empty collection if there's an error
+            $courses = collect([]);
+            
+            return view('admin.courses.index', compact('courses'))
+                ->with('error', 'Ocorreu um erro ao carregar os cursos. Por favor, tente novamente.');
+        }
+    }
+    
+    /**
+     * Show the form for creating a new course
+     */
+    public function coursesCreate()
+    {
+        try {
+            return view('admin.courses.create');
+            
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Error in AdminController@coursesCreate', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return redirect()->route('admin.courses.index')
+                ->with('error', 'Erro ao carregar o formulário de criação de curso.');
+        }
+    }
+    
+    /**
+     * Store a newly created course in storage
+     */
+    public function coursesStore(Request $request)
+    {
+        try {
+            $courseService = app(\App\Services\CourseService::class);
+            
+            // Basic validation
+            $request->validate([
+                'title' => 'required|string|max:255',
+                'description' => 'nullable|string',
+                'difficulty_level' => 'required|string|in:beginner,intermediate,advanced',
+                'estimated_duration' => 'required|integer|min:1',
+                'is_active' => 'nullable|boolean'
+            ]);
+            
+            $courseData = [
+                'title' => $request->title,
+                'description' => $request->description,
+                'difficulty_level' => $request->difficulty_level,
+                'estimated_duration' => $request->estimated_duration,
+                'is_active' => $request->has('is_active'),
+                'category_id' => 1, // Default category for now
+                'created_at' => now(),
+                'updated_at' => now()
+            ];
+            
+            if (method_exists($courseService, 'createCourse')) {
+                $courseService->createCourse($courseData);
+            }
+            
+            return redirect()->route('admin.courses.index')
+                ->with('success', 'Curso criado com sucesso!');
+                
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Error in AdminController@coursesStore', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return redirect()->back()
+                ->with('error', 'Erro ao criar o curso. Tente novamente.')
+                ->withInput();
+        }
+    }
+    
+    /**
+     * Display the specified course
+     */
+    public function coursesShow($id)
+    {
+        try {
+            $courseService = app(\App\Services\CourseService::class);
+            
+            if (method_exists($courseService, 'getCourseById')) {
+                $course = $courseService->getCourseById($id);
+            } else {
+                $courses = $courseService->getAllCourses();
+                $course = $courses->firstWhere('id', $id);
+            }
+            
+            if (!$course) {
+                return redirect()->route('admin.courses.index')
+                    ->with('error', 'Curso não encontrado.');
+            }
+            
+            return view('admin.courses.show', compact('course'));
+            
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Error in AdminController@coursesShow', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return redirect()->route('admin.courses.index')
+                ->with('error', 'Erro ao carregar o curso.');
+        }
+    }
+    
+    /**
+     * Show the form for editing the specified course
+     */
+    public function coursesEdit($id)
+    {
+        try {
+            $courseService = app(\App\Services\CourseService::class);
+            
+            if (method_exists($courseService, 'getCourseById')) {
+                $course = $courseService->getCourseById($id);
+            } else {
+                $courses = $courseService->getAllCourses();
+                $course = $courses->firstWhere('id', $id);
+            }
+            
+            if (!$course) {
+                return redirect()->route('admin.courses.index')
+                    ->with('error', 'Curso não encontrado.');
+            }
+            
+            return view('admin.courses.edit', compact('course'));
+            
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Error in AdminController@coursesEdit', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return redirect()->route('admin.courses.index')
+                ->with('error', 'Erro ao carregar o formulário de edição.');
+        }
+    }
+    
+    /**
+     * Update the specified course in storage
+     */
+    public function coursesUpdate(Request $request, $id)
+    {
+        try {
+            $courseService = app(\App\Services\CourseService::class);
+            
+            // Basic validation
+            $request->validate([
+                'title' => 'required|string|max:255',
+                'description' => 'nullable|string',
+                'difficulty_level' => 'required|string|in:beginner,intermediate,advanced',
+                'estimated_duration' => 'required|integer|min:1',
+                'is_active' => 'nullable|boolean'
+            ]);
+            
+            $courseData = [
+                'title' => $request->title,
+                'description' => $request->description,
+                'difficulty_level' => $request->difficulty_level,
+                'estimated_duration' => $request->estimated_duration,
+                'is_active' => $request->has('is_active'),
+                'updated_at' => now()
+            ];
+            
+            if (method_exists($courseService, 'updateCourse')) {
+                $courseService->updateCourse($id, $courseData);
+            }
+            
+            return redirect()->route('admin.courses.index')
+                ->with('success', 'Curso atualizado com sucesso!');
+                
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Error in AdminController@coursesUpdate', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return redirect()->back()
+                ->with('error', 'Erro ao atualizar o curso. Tente novamente.')
+                ->withInput();
+        }
+    }
+    
+    /**
+     * Remove the specified course from storage
+     */
+    public function coursesDestroy($id)
+    {
+        try {
+            $courseService = app(\App\Services\CourseService::class);
+            
+            if (method_exists($courseService, 'deleteCourse')) {
+                $courseService->deleteCourse($id);
+            }
+            
+            return redirect()->route('admin.courses.index')
+                ->with('success', 'Curso removido com sucesso!');
+                
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Error in AdminController@coursesDestroy', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return redirect()->route('admin.courses.index')
+                ->with('error', 'Erro ao remover o curso.');
+        }
+    }
+
+    /**
+     * Display the assignments page
      *
      * @return \Illuminate\View\View
      */
     public function atribuicoes()
     {
-        $courses = app(\App\Services\CourseService::class)->getAllCourses();
+        $simuladoService = app(\App\Modules\Simulado\Services\SimuladoService::class);
+        $videoService = app(\App\Services\VideoService::class);
+        
+        $simulados = $simuladoService->getAllSimulados();
+        $videos = $videoService->getAllVideos();
         $users = $this->userService->getAllUsers();
         
-        return view('admin.atribuicoes', compact('courses', 'users'));
+        // Estatísticas para a página
+        $estatisticas = [
+            'total_simulados' => $simulados->count(),
+            'total_videos' => $videos->count(),
+            'total_usuarios' => $users->count(),
+            'atribuicoes_ativas' => 0 // Placeholder para futuras implementações
+        ];
+        
+        return view('admin.atribuicoes', compact('simulados', 'videos', 'users', 'estatisticas'));
     }
     
     /**

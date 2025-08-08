@@ -20,8 +20,7 @@ class Permission extends Model
      */
     public function groups(): BelongsToMany
     {
-        return $this->belongsToMany(UserGroup::class, 'group_permission')
-            ->withPivot('course_id')
+        return $this->belongsToMany(UserGroup::class, 'group_permission', 'permission_id', 'group_id')
             ->withTimestamps();
     }
 
