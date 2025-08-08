@@ -3,24 +3,25 @@
 @section('title', 'Login - Hemera Capital Partners')
 
 @section('content')
-<div class="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100 flex items-center justify-center p-4 relative overflow-hidden" id="loginContainer">
+<div class="min-h-screen bg-gradient-to-br from-blue-100 via-indigo-100 to-purple-200 flex items-center justify-center relative overflow-hidden" id="loginContainer">
     <!-- Enhanced Background -->
     <div class="absolute inset-0 overflow-hidden">
+        <!-- Main Background Gradient -->
+        <div class="absolute inset-0 bg-gradient-subtle"></div>
+        
         <!-- Geometric Background -->
         <div class="absolute inset-0">
-            <div class="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-blue-100/30 via-indigo-50/20 to-purple-100/30"></div>
-            
             <!-- Floating Geometric Shapes -->
             <div class="geometric-shapes">
-                <div class="geometric-shape shape-1 bg-gradient-to-r from-blue-400/20 to-indigo-400/20"></div>
-                <div class="geometric-shape shape-2 bg-gradient-to-r from-indigo-400/15 to-purple-400/15"></div>
-                <div class="geometric-shape shape-3 bg-gradient-to-r from-purple-400/20 to-pink-400/20"></div>
-                <div class="geometric-shape shape-4 bg-gradient-to-r from-blue-300/25 to-cyan-300/25"></div>
-                <div class="geometric-shape shape-5 bg-gradient-to-r from-indigo-300/20 to-blue-300/20"></div>
+                <div class="geometric-shape shape-1 bg-gradient-shapes"></div>
+                <div class="geometric-shape shape-2 bg-gradient-shapes"></div>
+                <div class="geometric-shape shape-3 bg-gradient-shapes"></div>
+                <div class="geometric-shape shape-4 bg-gradient-shapes"></div>
+                <div class="geometric-shape shape-5 bg-gradient-shapes"></div>
             </div>
             
-            <!-- Grid Pattern -->
-            <div class="absolute inset-0 opacity-[0.03]" style="background-image: radial-gradient(circle at 1px 1px, rgba(59, 130, 246, 0.5) 1px, transparent 0); background-size: 40px 40px;"></div>
+            <!-- Enhanced Grid Pattern -->
+            <div class="absolute inset-0 opacity-[0.08]" style="background-image: radial-gradient(circle at 1px 1px, rgba(59, 130, 246, 0.8) 1px, transparent 0); background-size: 40px 40px;"></div>
             
             <!-- Subtle Particles -->
             <div class="particles-subtle">
@@ -31,15 +32,15 @@
         </div>
     </div>
     
-    <div class="w-full max-w-6xl mx-auto relative z-10">
-        <div class="layout-container">
+    <div class="w-full relative z-10 px-4">
+        <div class="layout-container max-w-6xl mx-auto">
             <!-- Login Form -->
             <div class="login-section">
-                <div class="login-card bg-white/95 backdrop-blur-sm border border-gray-200/50 rounded-2xl p-8 shadow-xl transform hover:scale-[1.02] transition-all duration-300">
+                <div class="login-card bg-white/95 backdrop-blur-enhanced border border-gray-200/50 rounded-2xl p-8 shadow-card transform hover:scale-[1.02] transition-all duration-300">
                 <!-- Logo/Header -->
                 <div class="text-center mb-8">
                     <div class="logo-container mb-6">
-                        <div class="w-16 h-16 mx-auto mb-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 flex items-center justify-center shadow-md transform hover:rotate-6 transition-all duration-300">
+                        <div class="w-16 h-16 mx-auto mb-4 rounded-xl bg-gradient-enhanced flex items-center justify-center shadow-enhanced transform hover:rotate-6 transition-all duration-300">
                             <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                             </svg>
@@ -51,7 +52,7 @@
                 </div>
 
                 <!-- Login Form -->
-                <form method="POST" action="/" class="space-y-6" id="loginForm">
+                <form method="POST" action="/" class="login-form" id="loginForm">
                     @csrf
                     
                     <!-- Email Field -->
@@ -124,7 +125,7 @@
                     <!-- Submit Button -->
                     <button 
                         type="submit" 
-                        class="modern-button w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 px-6 rounded-lg shadow-lg transform hover:scale-[1.02] transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                        class="modern-button w-full bg-gradient-enhanced text-white font-semibold py-3 px-6 rounded-lg shadow-enhanced transform hover:scale-[1.02] transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                         id="submitBtn"
                     >
                         <span class="button-text">Entrar</span>
@@ -235,6 +236,78 @@
 
 
 <style>
+/* CSS Variables for Consistent Spacing and Sizing */
+:root {
+    /* Layout Container Variables */
+    --layout-max-width: 1200px;
+    --layout-gap-desktop: 2rem;
+    --layout-gap-tablet: 1.5rem;
+    --layout-gap-mobile: 1rem;
+    
+    /* Enhanced Section Width Variables for Optimal Readability */
+    --login-section-max-width: 480px; /* Increased for better form readability */
+    --login-section-min-width: 320px;
+    --birthday-section-max-width: 420px; /* Increased for better content display */
+    --birthday-section-min-width: 300px;
+    --login-section-flex: 1.3; /* Adjusted for better visual balance */
+    --birthday-section-flex: 1;
+    
+    /* Optimal Content Width Constraints */
+    --content-optimal-width: 900px; /* Optimal reading width for both sections */
+    --section-spacing-ratio: 0.6; /* Golden ratio for section spacing */
+    
+    /* Card Spacing Variables */
+    --card-padding-desktop: 1.5rem;
+    --card-padding-tablet: 1rem;
+    --card-padding-mobile: 0.75rem;
+    --card-margin-bottom-desktop: 1.5rem;
+    --card-margin-bottom-tablet: 1rem;
+    --card-margin-bottom-mobile: 0.75rem;
+    
+    /* Login Card Variables */
+    --login-card-padding-desktop: 2rem;
+    --login-card-padding-tablet: 1.5rem;
+    --login-card-padding-mobile: 1rem;
+    --login-card-margin-desktop: 0;
+    --login-card-margin-tablet: 1rem;
+    --login-card-margin-mobile: 0.5rem;
+    
+    /* Input and Form Variables */
+    --input-padding-desktop: 0.75rem 1rem;
+    --input-padding-tablet: 0.75rem 1rem;
+    --input-padding-mobile: 0.75rem;
+    --form-group-spacing: 1.5rem;
+    --form-group-spacing-mobile: 1rem;
+    
+    /* Button Variables */
+    --button-padding-desktop: 0.75rem 1.5rem;
+    --button-padding-tablet: 0.75rem 1.5rem;
+    --button-padding-mobile: 0.75rem;
+    
+    /* Responsive Breakpoints */
+    --breakpoint-desktop: 1024px;
+    --breakpoint-tablet: 768px;
+    --breakpoint-mobile: 480px;
+    
+    /* Container Padding Variables */
+    --container-padding-desktop: 1rem;
+    --container-padding-tablet: 1rem;
+    --container-padding-mobile: 0.5rem;
+    
+    /* Animation and Effect Variables */
+    --geometric-shape-opacity-desktop: 0.8;
+    --geometric-shape-opacity-tablet: 0.6;
+    --geometric-shape-opacity-mobile: 0.5;
+    --particle-opacity-desktop: 1;
+    --particle-opacity-tablet: 0.6;
+    --particle-opacity-mobile: 0.4;
+    
+    /* Typography Spacing Variables */
+    --heading-margin-bottom: 0.5rem;
+    --paragraph-margin-bottom: 1rem;
+    --section-title-margin-bottom: 1rem;
+}
+
 /* Modern 3D Login Styles */
 /* Enhanced Background Styles */
 .geometric-shapes {
@@ -325,11 +398,12 @@
 
 .particle-subtle {
     position: absolute;
-    width: 3px;
-    height: 3px;
-    background: linear-gradient(45deg, rgba(59, 130, 246, 0.6), rgba(99, 102, 241, 0.6));
+    width: 4px;
+    height: 4px;
+    background: linear-gradient(45deg, rgba(59, 130, 246, 0.8), rgba(99, 102, 241, 0.8));
     border-radius: 50%;
     animation: subtleParticleFloat 20s infinite linear;
+    opacity: var(--particle-opacity-desktop);
 }
 
 .particle-subtle-1 { left: 5%; top: 10%; animation-delay: 0s; }
@@ -382,54 +456,62 @@
     }
 }
 
-/* Login Card 3D Effects */
-.login-card {
-    perspective: 1000px;
-    transform-style: preserve-3d;
-}
-
-.login-card:hover {
-    transform: rotateY(2deg) rotateX(2deg);
-}
-
-/* Custom Layout Container */
-.layout-container {
-    display: flex;
-    flex-direction: row;
-    gap: 2rem;
-    align-items: flex-start;
-    width: 100%;
-}
-
-.login-section {
-    flex: 1;
-    max-width: 450px;
-}
-
-.birthday-section {
-    flex: 1;
-    max-width: 400px;
-}
-
-/* Login Card Enhanced */
+/* Enhanced Login Card */
 .login-card {
     position: relative;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    box-shadow: 
-        0 20px 40px -12px rgba(0, 0, 0, 0.1),
-        0 8px 32px -8px rgba(59, 130, 246, 0.1),
-        0 0 0 1px rgba(255, 255, 255, 0.8);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .login-card:hover {
-    box-shadow: 
-        0 25px 50px -12px rgba(0, 0, 0, 0.15),
-        0 12px 40px -8px rgba(59, 130, 246, 0.15),
-        0 0 0 1px rgba(255, 255, 255, 0.9);
     transform: translateY(-2px) scale(1.02);
 }
+
+/* Enhanced Layout Container for Optimal Horizontal Distribution */
+.layout-container {
+    display: flex;
+    flex-direction: row;
+    gap: var(--layout-gap-desktop);
+    align-items: stretch;
+    justify-content: center;
+    width: 100%;
+    margin: 0 auto;
+    box-sizing: border-box;
+    min-height: 600px;
+}
+
+/* Additional constraints for ultra-wide screens */
+@media (min-width: 1400px) {
+    .layout-container {
+        gap: calc(var(--layout-gap-desktop) * 1.2);
+    }
+}
+
+/* Optimized Section Proportions for Better Visual Balance */
+.login-section {
+    flex: var(--login-section-flex);
+    max-width: var(--login-section-max-width);
+    min-width: var(--login-section-min-width);
+    /* Enhanced alignment and spacing */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-self: center; /* Center vertically within container */
+}
+
+.birthday-section {
+    flex: var(--birthday-section-flex);
+    max-width: var(--birthday-section-max-width);
+    min-width: var(--birthday-section-min-width);
+    /* Enhanced alignment and spacing */
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-self: flex-start; /* Align to top for birthday content */
+}
+
+
 
 .modern-input:hover {
     background: rgba(255, 255, 255, 0.12);
@@ -453,20 +535,14 @@
     opacity: 1;
 }
 
-/* Modern Button Styles */
+/* Enhanced Button Styles */
 .modern-button {
     position: relative;
     overflow: hidden;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 
-        0 8px 20px -5px rgba(59, 130, 246, 0.25),
-        0 3px 6px -2px rgba(0, 0, 0, 0.08);
 }
 
 .modern-button:hover {
-    box-shadow: 
-        0 12px 30px -5px rgba(59, 130, 246, 0.35),
-        0 5px 10px -2px rgba(0, 0, 0, 0.12);
     transform: translateY(-1px) scale(1.02);
 }
 
@@ -512,7 +588,8 @@
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.8);
     border-radius: 1rem;
-    padding: 1.5rem;
+    padding: var(--card-padding-desktop);
+    margin-bottom: var(--card-margin-bottom-desktop);
     box-shadow: 
         0 20px 40px -12px rgba(0, 0, 0, 0.1),
         0 8px 32px -8px rgba(59, 130, 246, 0.1);
@@ -582,10 +659,18 @@
     }
 }
 
+/* Login Form Styles */
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--form-group-spacing);
+}
+
 /* Form Group Animation */
 .form-group {
     animation: slideInLeft 0.6s ease-out;
     animation-fill-mode: both;
+    margin-bottom: var(--form-group-spacing);
 }
 
 .form-group:nth-child(1) { animation-delay: 0.1s; }
@@ -607,82 +692,109 @@
 /* Responsive Adjustments - Enhanced */
 @media (max-width: 1024px) {
     .geometric-shape {
-        opacity: 0.5;
+        opacity: var(--geometric-shape-opacity-tablet);
         animation-duration: 30s;
     }
     
     .login-card {
-        padding: 1.5rem;
+        padding: var(--login-card-padding-tablet);
+        margin: var(--login-card-margin-tablet);
     }
     
     .card {
-        padding: 1rem;
-        margin-bottom: 1rem;
+        padding: var(--card-padding-tablet);
+        margin-bottom: var(--card-margin-bottom-tablet);
     }
     
+    /* Enhanced Layout Container for Tablet */
     .layout-container {
-        gap: 1.5rem;
+        gap: var(--layout-gap-tablet);
+        padding: 0 var(--container-padding-tablet);
+        min-height: 500px; /* Reduced min-height for tablet */
+        align-items: flex-start; /* Better alignment for smaller screens */
     }
     
     .login-section,
     .birthday-section {
         max-width: none;
+        min-width: auto;
+    }
+    
+    /* Adjust section alignment for tablet */
+    .login-section {
+        align-self: flex-start; /* Align to top on tablet for better space usage */
+    }
+    
+    .particles-subtle {
+        opacity: var(--particle-opacity-tablet);
     }
 }
 
 @media (max-width: 768px) {
     .login-card {
-        margin: 1rem;
-        padding: 1.5rem;
+        margin: var(--login-card-margin-mobile);
+        padding: var(--login-card-padding-mobile);
         bg-white/20;
     }
     
     .particles-subtle {
-        opacity: 0.3;
+        opacity: var(--particle-opacity-mobile);
     }
     
     .geometric-shapes {
-        opacity: 0.3;
+        opacity: var(--geometric-shape-opacity-mobile);
     }
     
-
+    .modern-input {
+        padding: var(--input-padding-mobile);
+    }
+    
+    .modern-button {
+        padding: var(--button-padding-mobile);
+    }
     
     h1 {
         font-size: 1.75rem;
+        margin-bottom: var(--heading-margin-bottom);
     }
     
     h2 {
         font-size: 1.125rem;
+        margin-bottom: var(--heading-margin-bottom);
     }
 }
 
 @media (max-width: 480px) {
     .login-card {
-        padding: 1rem;
-        margin: 0.5rem;
+        padding: var(--login-card-padding-mobile);
+        margin: var(--login-card-margin-mobile);
     }
     
     .modern-input {
-        padding: 0.75rem;
+        padding: var(--input-padding-mobile);
     }
     
     .modern-button {
-        padding: 0.75rem;
+        padding: var(--button-padding-mobile);
+    }
+    
+    .layout-container {
+        padding: 0 var(--container-padding-mobile);
     }
 }
 
 @media (max-width: 768px) {
     .geometric-shape {
-        opacity: 0.4;
+        opacity: var(--geometric-shape-opacity-mobile);
     }
     
     .particle-subtle {
-        opacity: 0.4;
+        opacity: var(--particle-opacity-mobile);
     }
     
     .card {
-        padding: 0.75rem;
-        margin-bottom: 0.75rem;
+        padding: var(--card-padding-mobile);
+        margin-bottom: var(--card-margin-bottom-mobile);
     }
     
     .confetti {
@@ -693,11 +805,19 @@
     /* Mobile: stack vertically */
     .layout-container {
         flex-direction: column;
-        gap: 1rem;
+        gap: var(--layout-gap-mobile);
     }
     
     .birthday-section {
         order: -1; /* Birthday section on top on mobile */
+    }
+    
+    .login-form {
+        gap: var(--form-group-spacing-mobile);
+    }
+    
+    .form-group {
+        margin-bottom: var(--form-group-spacing-mobile);
     }
 }
 

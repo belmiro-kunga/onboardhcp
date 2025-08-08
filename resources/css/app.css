@@ -19,3 +19,31 @@
     --color-highlight: #EFE9FD;
     --color-border: #E2E8F0;
 }
+
+/* Enhanced gradients and effects for login page */
+@layer utilities {
+    .bg-gradient-enhanced {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.8) 0%, rgba(99, 102, 241, 0.8) 50%, rgba(147, 51, 234, 0.8) 100%);
+    }
+    
+    .bg-gradient-subtle {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.3) 0%, rgba(99, 102, 241, 0.2) 50%, rgba(147, 51, 234, 0.3) 100%);
+    }
+    
+    .bg-gradient-shapes {
+        background: linear-gradient(45deg, rgba(59, 130, 246, 0.4) 0%, rgba(99, 102, 241, 0.4) 100%);
+    }
+    
+    .backdrop-blur-enhanced {
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+    }
+    
+    .shadow-enhanced {
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 8px 32px -8px rgba(59, 130, 246, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.1);
+    }
+    
+    .shadow-card {
+        box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.1), 0 8px 32px -8px rgba(59, 130, 246, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.8);
+    }
+}

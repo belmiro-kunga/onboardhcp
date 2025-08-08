@@ -8,7 +8,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <!-- Remover as linhas do CDN e configuração inline -->
 </head>
-<body class="min-h-screen flex items-center justify-center">
+<body class="min-h-screen">
     @yield('content')
 </body>
 </html>
