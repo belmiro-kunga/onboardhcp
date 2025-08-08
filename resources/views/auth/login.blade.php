@@ -34,6 +34,91 @@
     
     <div class="w-full relative z-10 px-4">
         <div class="layout-container max-w-6xl mx-auto">
+            <!-- Birthday Section - Posicionada no topo -->
+            <div class="birthday-section">
+                <!-- Aniversariantes do Dia -->
+                <div class="card mb-6 relative overflow-hidden">
+                    <!-- Animação de Confetes -->
+                    <div class="absolute inset-0 pointer-events-none">
+                        <div class="confetti-container">
+                            @for($i = 0; $i < 20; $i++)
+                                <div class="confetti confetti-{{ $i % 5 + 1 }}"></div>
+                            @endfor
+                        </div>
+                    </div>
+                    
+                    <div class="text-center relative z-10">
+                        <div class="animate-bounce mb-4">
+                            <div class="w-16 h-16 mx-auto bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
+                                <span class="text-2xl">🎂</span>
+                            </div>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-800 mb-2">🎉 Aniversariante do Dia!</h3>
+                        
+                        <div class="mb-4 p-4 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg">
+                            <div class="w-12 h-12 mx-auto mb-2 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white font-bold">
+                                M
+                            </div>
+                            <p class="font-semibold text-gray-800 animate-pulse">Maria Silva</p>
+                            <p class="text-sm text-gray-600">
+                                28 anos
+                            </p>
+                            <div class="mt-2 text-xs text-gray-500">
+                                🎈 Parabéns! 🎈
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Próximos Aniversariantes -->
+                <div class="card">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4 text-center">
+                        📅 Próximos Aniversários
+                    </h3>
+                    
+                    <div class="space-y-3">
+                        <div class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                            <div class="w-10 h-10 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold mr-3">
+                                J
+                            </div>
+                            <div class="flex-1">
+                                <p class="font-medium text-gray-800 text-sm">João Santos</p>
+                                <p class="text-xs text-gray-600">
+                                    15/08 - 7 dias
+                                </p>
+                            </div>
+                            <div class="text-lg">🎂</div>
+                        </div>
+                        
+                        <div class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                            <div class="w-10 h-10 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center text-white font-semibold mr-3">
+                                A
+                            </div>
+                            <div class="flex-1">
+                                <p class="font-medium text-gray-800 text-sm">Ana Costa</p>
+                                <p class="text-xs text-gray-600">
+                                    22/08 - 14 dias
+                                </p>
+                            </div>
+                            <div class="text-lg">🎂</div>
+                        </div>
+                        
+                        <div class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                            <div class="w-10 h-10 bg-gradient-to-r from-purple-400 to-pink-500 rounded-full flex items-center justify-center text-white font-semibold mr-3">
+                                P
+                            </div>
+                            <div class="flex-1">
+                                <p class="font-medium text-gray-800 text-sm">Pedro Lima</p>
+                                <p class="text-xs text-gray-600">
+                                    28/08 - 20 dias
+                                </p>
+                            </div>
+                            <div class="text-lg">🎂</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Login Form -->
             <div class="login-section">
                 <div class="login-card bg-white/95 backdrop-blur-enhanced border border-gray-200/50 rounded-2xl p-8 shadow-card transform hover:scale-[1.02] transition-all duration-300">
@@ -143,91 +228,6 @@
                             Registe-se
                         </a>
                     </p>
-                </div>
-            </div>
-
-            <!-- Seção de Aniversariantes -->
-            <div class="birthday-section">
-                <!-- Aniversariantes do Dia -->
-                <div class="card mb-6 relative overflow-hidden">
-                    <!-- Animação de Confetes -->
-                    <div class="absolute inset-0 pointer-events-none">
-                        <div class="confetti-container">
-                            @for($i = 0; $i < 20; $i++)
-                                <div class="confetti confetti-{{ $i % 5 + 1 }}"></div>
-                            @endfor
-                        </div>
-                    </div>
-                    
-                    <div class="text-center relative z-10">
-                        <div class="animate-bounce mb-4">
-                            <div class="w-16 h-16 mx-auto bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
-                                <span class="text-2xl">🎂</span>
-                            </div>
-                        </div>
-                        <h3 class="text-lg font-bold text-gray-800 mb-2">🎉 Aniversariante do Dia!</h3>
-                        
-                        <div class="mb-4 p-4 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg">
-                            <div class="w-12 h-12 mx-auto mb-2 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white font-bold">
-                                M
-                            </div>
-                            <p class="font-semibold text-gray-800 animate-pulse">Maria Silva</p>
-                            <p class="text-sm text-gray-600">
-                                28 anos
-                            </p>
-                            <div class="mt-2 text-xs text-gray-500">
-                                🎈 Parabéns! 🎈
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Próximos Aniversariantes -->
-                <div class="card">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4 text-center">
-                        📅 Próximos Aniversários
-                    </h3>
-                    
-                    <div class="space-y-3">
-                        <div class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                            <div class="w-10 h-10 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold mr-3">
-                                J
-                            </div>
-                            <div class="flex-1">
-                                <p class="font-medium text-gray-800 text-sm">João Santos</p>
-                                <p class="text-xs text-gray-600">
-                                    15/08 - 7 dias
-                                </p>
-                            </div>
-                            <div class="text-lg">🎂</div>
-                        </div>
-                        
-                        <div class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                            <div class="w-10 h-10 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center text-white font-semibold mr-3">
-                                A
-                            </div>
-                            <div class="flex-1">
-                                <p class="font-medium text-gray-800 text-sm">Ana Costa</p>
-                                <p class="text-xs text-gray-600">
-                                    22/08 - 14 dias
-                                </p>
-                            </div>
-                            <div class="text-lg">🎂</div>
-                        </div>
-                        
-                        <div class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                            <div class="w-10 h-10 bg-gradient-to-r from-purple-400 to-pink-500 rounded-full flex items-center justify-center text-white font-semibold mr-3">
-                                P
-                            </div>
-                            <div class="flex-1">
-                                <p class="font-medium text-gray-800 text-sm">Pedro Lima</p>
-                                <p class="text-xs text-gray-600">
-                                    28/08 - 20 dias
-                                </p>
-                            </div>
-                            <div class="text-lg">🎂</div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -473,42 +473,107 @@
     display: flex;
     flex-direction: row;
     gap: var(--layout-gap-desktop);
-    align-items: stretch;
-    justify-content: center;
+    align-items: flex-start;
+    justify-content: space-between;
     width: 100%;
+    max-width: 1200px;
     margin: 0 auto;
     box-sizing: border-box;
     min-height: 600px;
+    padding-top: 2rem;
+}
+
+/* Responsive Layout Adjustments */
+@media (max-width: 1024px) {
+    .layout-container {
+        flex-direction: row;
+        align-items: flex-start;
+        gap: 1.5rem;
+        padding-top: 1rem;
+    }
+    
+    .birthday-section {
+        width: 300px;
+        max-width: 300px;
+        min-width: 250px;
+        order: 1;
+    }
+    
+    .login-section {
+        width: 400px;
+        max-width: 400px;
+        min-width: 350px;
+        order: 2;
+    }
+}
+
+@media (max-width: 768px) {
+    .layout-container {
+        flex-direction: row;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 0 1rem;
+        padding-top: 1rem;
+    }
+    
+    .birthday-section {
+        width: 280px;
+        max-width: 280px;
+        min-width: 220px;
+        order: 1;
+    }
+    
+    .login-section {
+        width: 350px;
+        max-width: 350px;
+        min-width: 300px;
+        order: 2;
+    }
 }
 
 /* Additional constraints for ultra-wide screens */
 @media (min-width: 1400px) {
     .layout-container {
-        gap: calc(var(--layout-gap-desktop) * 1.2);
+        gap: 3rem;
+        max-width: 1400px;
+    }
+    
+    .login-section {
+        width: 500px;
+        max-width: 500px;
+    }
+    
+    .birthday-section {
+        width: 400px;
+        max-width: 400px;
     }
 }
 
 /* Optimized Section Proportions for Better Visual Balance */
-.login-section {
-    flex: var(--login-section-flex);
-    max-width: var(--login-section-max-width);
-    min-width: var(--login-section-min-width);
-    /* Enhanced alignment and spacing */
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-self: center; /* Center vertically within container */
-}
-
 .birthday-section {
-    flex: var(--birthday-section-flex);
-    max-width: var(--birthday-section-max-width);
-    min-width: var(--birthday-section-min-width);
+    flex: 0 0 auto;
+    width: 350px;
+    max-width: 350px;
+    min-width: 300px;
     /* Enhanced alignment and spacing */
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    align-self: flex-start; /* Align to top for birthday content */
+    align-self: flex-start;
+    order: 1; /* Posiciona primeiro (esquerda) */
+}
+
+.login-section {
+    flex: 0 0 auto;
+    width: 450px;
+    max-width: 450px;
+    min-width: 400px;
+    /* Enhanced alignment and spacing */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-self: flex-start;
+    order: 2; /* Posiciona segundo (direita) */
 }
 
 
@@ -783,22 +848,27 @@
     }
 }
 
-/* Para telas muito pequenas, manter vertical */
-@media (max-width: 400px) {
+/* Para telas muito pequenas, usar layout vertical */
+@media (max-width: 600px) {
     .layout-container {
         flex-direction: column;
-        gap: 1rem;
+        align-items: center;
+        gap: 1.5rem;
+        padding-top: 1rem;
     }
     
     .birthday-section {
-        order: -1; /* Aniversários no topo em telas muito pequenas */
-    }
-    
-    .login-section,
-    .birthday-section {
-        flex: none;
-        min-width: auto;
+        order: 1; /* Aniversários no topo */
         width: 100%;
+        max-width: 400px;
+        min-width: auto;
+    }
+    
+    .login-section {
+        order: 2; /* Login abaixo */
+        width: 100%;
+        max-width: 400px;
+        min-width: auto;
     }
 }
 
@@ -821,22 +891,7 @@
         height: 6px;
     }
     
-    /* Manter layout horizontal mesmo em mobile */
-    .layout-container {
-        flex-direction: row;
-        gap: var(--layout-gap-mobile);
-        align-items: flex-start;
-    }
-    
-    .login-section {
-        flex: 1.2;
-        min-width: 280px;
-    }
-    
-    .birthday-section {
-        flex: 0.8;
-        min-width: 240px;
-    }
+
     
     .login-form {
         gap: var(--form-group-spacing-mobile);

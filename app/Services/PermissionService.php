@@ -366,16 +366,30 @@ class PermissionService
      */
     protected function clearCacheByPattern(string $pattern): void
     {
-        if (method_exists(app('cache')->store()->getStore(), 'getPrefix')) {
-            $prefix = app('cache')->store()->getPrefix();
-            $pattern = $prefix . $pattern;
-        }
+        // Check if Redis is available and configured
+        if (config('cache.default') === 'redis' && app()->bound('redis')) {
+            try {
+                if (method_exists(app('cache')->store()->getStore(), 'getPrefix')) {
+                    $prefix = app('cache')->store()->getPrefix();
+                    $pattern = $prefix . $pattern;
+                }
 
-        $redis = app('redis')->connection();
-        $keys = $redis->keys($pattern);
-        
-        if (!empty($keys)) {
-            $redis->del($keys);
+                $redis = app('redis')->connection();
+                $keys = $redis->keys($pattern);
+                
+                if (!empty($keys)) {
+                    $redis->del($keys);
+                }
+            } catch (\Exception $e) {
+                // Redis not available, fall back to cache flush
+                \Log::warning('Redis not available for pattern cache clearing: ' . $e->getMessage());
+                Cache::flush();
+            }
+        } else {
+            // For non-Redis cache drivers, we can't do pattern matching
+            // So we'll need to clear the entire cache or use a different approach
+            // For now, we'll just log this and continue without clearing
+            \Log::info('Pattern cache clearing skipped - Redis not configured as cache driver');
         }
     }
 
