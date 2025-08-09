@@ -189,7 +189,7 @@
             /* Pagination */
             .pagination-container {
                 display: flex;
-                justify-content: between;
+                justify-content: space-between;
                 align-items: center;
                 margin-top: 1rem;
                 padding: 1rem 0;
@@ -234,6 +234,22 @@
             }
 
             /* Responsive Improvements */
+            @media (max-width: 768px) {
+                .users-stat-card {
+                    padding: 1rem;
+                }
+                
+                .filter-tag {
+                    padding: 0.375rem 0.625rem;
+                    font-size: 0.8rem;
+                }
+                
+                .users-btn-primary, .users-btn-secondary {
+                    padding: 0.625rem 1.25rem;
+                    font-size: 0.9rem;
+                }
+            }
+            
             @media (max-width: 640px) {
                 .users-btn-primary, .users-btn-secondary {
                     padding: 0.5rem 1rem;
@@ -253,6 +269,20 @@
                 .input-field {
                     padding: 0.5rem 0.75rem;
                 }
+                
+                .users-stat-card {
+                    padding: 0.875rem;
+                }
+                
+                .pagination-container {
+                    flex-direction: column;
+                    gap: 1rem;
+                    text-align: center;
+                }
+                
+                .pagination-controls {
+                    justify-content: center;
+                }
             }
             
             /* Avatar responsive sizing */
@@ -264,6 +294,20 @@
                 background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                 color: white;
                 font-weight: 600;
+            }
+            
+            /* Users Stat Cards */
+            .users-stat-card {
+                padding: 1.5rem;
+                border-radius: 1rem;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+                transition: all 0.3s ease;
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+            
+            .users-stat-card:hover {
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
             }
             
             /* Mobile card improvements */
@@ -1168,14 +1212,58 @@
 
                 async loadFilterOptions() {
                     try {
-                        const response = await fetch('/admin/users/search/filter-options');
+                        const response = await fetch('/admin/users/search/filter-options', {
+                            method: 'GET',
+                            headers: {
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                                'X-Requested-With': 'XMLHttpRequest'
+                            },
+                            credentials: 'same-origin'
+                        });
+                        
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        
+                        // Check if response is actually JSON
+                        const contentType = response.headers.get('content-type');
+                        if (!contentType || !contentType.includes('application/json')) {
+                            console.warn('Filter options endpoint returned non-JSON response, using fallback options');
+                            this.useFallbackFilterOptions();
+                            return;
+                        }
+                        
                         const options = await response.json();
                         
-                        this.populateSelectOptions('departmentFilter', options.departments);
-                        this.populateSelectOptions('roleFilter', options.roles);
+                        // Validate response structure
+                        if (options && typeof options === 'object') {
+                            this.populateSelectOptions('departmentFilter', options.departments || []);
+                            this.populateSelectOptions('roleFilter', options.roles || []);
+                        } else {
+                            throw new Error('Invalid response structure');
+                        }
                     } catch (error) {
                         console.error('Error loading filter options:', error);
+                        console.warn('Using fallback filter options due to error');
+                        this.useFallbackFilterOptions();
                     }
+                }
+                
+                useFallbackFilterOptions() {
+                    // Fallback departments and roles if API fails
+                    const fallbackDepartments = [
+                        'Recursos Humanos', 'Tecnologia', 'Financeiro', 
+                        'Marketing', 'Vendas', 'Jurídico', 'Administração'
+                    ];
+                    
+                    const fallbackRoles = [
+                        'admin', 'user', 'manager', 'employee'
+                    ];
+                    
+                    this.populateSelectOptions('departmentFilter', fallbackDepartments);
+                    this.populateSelectOptions('roleFilter', fallbackRoles);
                 }
 
                 populateSelectOptions(selectId, options) {
@@ -1528,10 +1616,6 @@
 
             // Initialize search manager
             let userSearchManager;
-            document.addEventListener('DOMContentLoaded', function() {
-                userSearchManager = new UserSearchManager();
-            });
-
             // Original modal functions
             function openNewUserModal() {
                 document.getElementById('newUserModal').classList.remove('hidden');
@@ -1615,8 +1699,11 @@
                 return userSearchManager ? userSearchManager.currentFilters : {};
             }
             
-            // Export form submission
+            // Export form submission and initialization
             document.addEventListener('DOMContentLoaded', function() {
+                // Initialize search manager
+                userSearchManager = new UserSearchManager();
+                
                 const exportForm = document.getElementById('exportForm');
                 if (exportForm) {
                     exportForm.addEventListener('submit', function(e) {

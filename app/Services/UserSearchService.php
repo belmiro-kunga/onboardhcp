@@ -19,7 +19,7 @@ class UserSearchService
      */
     public function search(array $filters = []): LengthAwarePaginator
     {
-        $query = User::query()->with(['roles', 'groups']);
+        $query = User::query()->with(['roles']);
         
         // Apply search filters
         $this->applySearchFilter($query, $filters);

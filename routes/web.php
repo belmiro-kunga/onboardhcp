@@ -72,7 +72,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
         Route::get('/filter-options', [\App\Http\Controllers\UserSearchController::class, 'filterOptions'])->name('filter-options');
         Route::post('/save-config', [\App\Http\Controllers\UserSearchController::class, 'saveSearchConfig'])->name('save-config');
         Route::get('/saved-configs', [\App\Http\Controllers\UserSearchController::class, 'getSavedConfigs'])->name('saved-configs');
-        Route::get('/export', [\App\Http\Controllers\UserSearchController::class, 'export'])->name('export');
+        Route::get('/search-export', [\App\Http\Controllers\UserSearchController::class, 'export'])->name('search-export');
     });
     
     // Import/Export Routes
