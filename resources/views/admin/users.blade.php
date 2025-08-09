@@ -1467,34 +1467,49 @@
                 }
 
                 renderUserRow(user) {
-                    const statusBadge = user.status === 'active' ? 
-                        '<span class="status-badge status-active">Ativo</span>' :
-                        '<span class="status-badge">Inativo</span>';
-                    
-                    const roleBadge = user.is_admin ?
-                        '<span class="status-badge role-admin"><svg class="w-3 h-3 mr-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>Administrador</span>' :
-                        '<span class="status-badge role-user"><svg class="w-3 h-3 mr-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>Funcionário</span>';
-                    
+                    const roleBadge = user.is_admin
+                        ? '<span class="status-badge role-admin text-xs"><svg class="w-3 h-3 mr-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>Admin</span>'
+                        : '<span class="status-badge role-user text-xs"><svg class="w-3 h-3 mr-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>Func.</span>';
+
+                    const statusMap = {
+                        active: { cls: 'status-badge bg-green-100 text-green-800', label: '✅' },
+                        inactive: { cls: 'status-badge bg-red-100 text-red-800', label: '❌' },
+                        pending: { cls: 'status-badge bg-yellow-100 text-yellow-800', label: '⏳' },
+                        blocked: { cls: 'status-badge bg-red-100 text-red-800', label: '🚫' },
+                        suspended: { cls: 'status-badge bg-orange-100 text-orange-800', label: '⏸️' },
+                    };
+                    const st = statusMap[user.status || 'active'] || statusMap.active;
+                    const statusBadge = `<span class="${st.cls} text-xs">${st.label}</span>`;
+
+                    const safe = s => (s ?? '').toString().replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
                     return `
                         <tr class="hover:bg-gray-50">
-                            <td class="px-6 py-4 whitespace-nowrap">
+                            <td class="px-3 py-3 whitespace-nowrap">
                                 <div class="flex items-center">
-                                    <div class="avatar mr-3">${user.name.charAt(0).toUpperCase()}</div>
-                                    <div class="text-sm font-medium text-gray-900">${user.name}</div>
+                                    <div class="avatar mr-2 w-8 h-8 text-sm">${safe(user.name).charAt(0).toUpperCase()}</div>
+                                    <div class="min-w-0 flex-1">
+                                        <div class="text-sm font-medium text-gray-900 truncate">${safe(user.name)}</div>
+                                        ${user.position ? `<div class=\"text-xs text-gray-500 truncate\">${safe(user.position)}</div>` : ''}
+                                    </div>
                                 </div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${user.email}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">${roleBadge}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">${statusBadge}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${this.formatDate(user.created_at)}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${user.last_login_at ? this.formatDate(user.last_login_at) : 'Nunca'}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <button onclick="editUser(${user.id}, '${user.name}', '${user.email}', '${user.birth_date || ''}', ${user.is_admin ? 1 : 0})" class="text-blue-600 hover:text-blue-900 mr-3">
-                                    <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                                </button>
-                                <button onclick="deleteUser(${user.id})" class="text-red-600 hover:text-red-900">
-                                    <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                </button>
+                            <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-500"><div class="truncate max-w-xs">${safe(user.email)}</div></td>
+                            <td class="px-3 py-3 whitespace-nowrap">${roleBadge}</td>
+                            <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-500"><div class="truncate max-w-24">${safe(user.department) || '-'}</div></td>
+                            <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-500"><div class="truncate max-w-24">${safe(user.position) || '-'}</div></td>
+                            <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-500">${safe(user.phone) || '-'}</td>
+                            <td class="px-3 py-3 whitespace-nowrap">${statusBadge}</td>
+                            <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-500">${this.formatDate(user.created_at)}</td>
+                            <td class="px-3 py-3 whitespace-nowrap text-sm font-medium">
+                                <div class="flex space-x-1">
+                                    <button onclick="editUser(${user.id}, '${safe(user.name)}', '${safe(user.email)}', '${safe(user.birth_date || '')}', '${safe(user.phone || '')}', '${safe(user.department || '')}', '${safe(user.position || '')}', '${safe(user.hire_date || '')}', '${safe(user.status || 'active')}', ${user.is_admin ? 1 : 0})" class="text-blue-600 hover:text-blue-900 p-1">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                    </button>
+                                    <button onclick="deleteUser(${user.id})" class="text-red-600 hover:text-red-900 p-1">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     `;
@@ -1628,23 +1643,28 @@
             }
 
             function editUser(id, name, email, birthDate, phone, department, position, hireDate, status, isAdmin) {
-                document.getElementById('editForm').action = `/admin/users/${id}`;
-                document.getElementById('editName').value = name;
-                document.getElementById('editEmail').value = email;
-                document.getElementById('editBirthDate').value = birthDate;
-                document.getElementById('editPhone').value = phone || '';
-                document.getElementById('editDepartment').value = department || '';
-                document.getElementById('editPosition').value = position || '';
-                document.getElementById('editHireDate').value = hireDate || '';
-                document.getElementById('editStatus').value = status || 'active';
-                document.getElementById('editIsAdmin').value = isAdmin;
-                document.getElementById('editModal').classList.remove('hidden');
-                document.getElementById('editModal').classList.add('flex');
+                const form = document.getElementById('editUserForm');
+                form.action = `/admin/users/${id}`;
+
+                document.getElementById('edit_name').value = name || '';
+                document.getElementById('edit_email').value = email || '';
+                document.getElementById('edit_birth_date').value = birthDate || '';
+                document.getElementById('edit_phone').value = phone || '';
+                document.getElementById('edit_department').value = department || '';
+                document.getElementById('edit_position').value = position || '';
+                document.getElementById('edit_hire_date').value = hireDate || '';
+                document.getElementById('edit_status').value = status || 'active';
+                document.getElementById('edit_is_admin').value = isAdmin ? 1 : 0;
+
+                const modal = document.getElementById('editUserModal');
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
             }
 
-            function closeEditModal() {
-                document.getElementById('editModal').classList.add('hidden');
-                document.getElementById('editModal').classList.remove('flex');
+            function closeEditUserModal() {
+                const modal = document.getElementById('editUserModal');
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
             }
 
             function deleteUser(id) {
