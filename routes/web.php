@@ -64,6 +64,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::post('/users', [\App\Http\Controllers\UserController::class, 'store'])->name('admin.users.create');
     Route::put('/users/{user}', [\App\Http\Controllers\UserController::class, 'update'])->name('admin.users.update');
     Route::delete('/users/{user}', [\App\Http\Controllers\UserController::class, 'destroy'])->name('admin.users.delete');
+    Route::patch('/users/{user}/reset-password', [\App\Http\Controllers\UserController::class, 'forceResetPassword'])->name('admin.users.reset-password');
     
     // User Status Control Routes
     Route::patch('/users/{user}/status', [\App\Http\Controllers\UserController::class, 'updateStatus'])->name('admin.users.status');

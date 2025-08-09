@@ -108,6 +108,36 @@ class NotificationService
     }
 
     /**
+     * Send password reset notification to user
+     */
+    public function sendPasswordResetNotification(User $user, string $newPassword): bool
+    {
+        try {
+            // For now, we'll just log the password reset notification
+            // In a real implementation, you would send an actual email
+            Log::info('Password reset notification sent', [
+                'user_id' => $user->id,
+                'user_email' => $user->email,
+                'user_name' => $user->name,
+                'new_password' => '[REDACTED]', // Don't log actual password
+                'reset_by' => auth()->user()->email,
+                'sent_at' => now()
+            ]);
+
+            // TODO: Implement actual email sending with Mail facade
+            // Mail::to($user->email)->send(new PasswordResetNotification($user, $newPassword));
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error('Failed to send password reset notification', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage()
+            ]);
+            return false;
+        }
+    }
+
+    /**
      * Send bulk status change notification summary to admin
      */
     public function sendBulkStatusChangeSummary(int $updatedCount, string $newStatus, ?string $reason = null): bool

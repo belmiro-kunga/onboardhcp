@@ -346,6 +346,67 @@ class UserController extends Controller
     }
 
     /**
+     * Force reset user password
+     */
+    public function forceResetPassword(Request $request, User $user): JsonResponse
+    {
+        $request->validate([
+            'new_password' => 'required|string|min:8|confirmed',
+            'notify_user' => 'boolean'
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            // Prevent resetting password of current user through this method
+            if ($user->id === auth()->id()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Use a opção de perfil para alterar sua própria senha.'
+                ], 400);
+            }
+
+            // Update user password
+            $user->update([
+                'password' => Hash::make($request->new_password),
+                'password_changed_at' => now()
+            ]);
+
+            // Log password reset
+            Log::info('Password force reset', [
+                'user_id' => $user->id,
+                'user_email' => $user->email,
+                'reset_by' => auth()->user()->email,
+                'timestamp' => now()
+            ]);
+
+            // Send notification if requested
+            if ($request->boolean('notify_user', false)) {
+                $this->notificationService->sendPasswordResetNotification(
+                    $user,
+                    $request->new_password
+                );
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Senha do usuário redefinida com sucesso!'
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error force resetting password: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Erro ao redefinir senha: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Get status label
      */
     private function getStatusLabel(string $status): string
