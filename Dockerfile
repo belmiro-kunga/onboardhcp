@@ -5,6 +5,8 @@ RUN apt-get update && apt-get install -y \
     git \
     curl \
     libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
     libonig-dev \
     libxml2-dev \
     libzip-dev \
@@ -57,10 +59,9 @@ COPY --chown=www:www . /var/www
 # Finalizar instalação do composer
 RUN composer dump-autoload --optimize --classmap-authoritative
 
-# Otimizar Laravel
+# Otimizar Laravel (removendo view:cache que pode causar problemas)
 RUN php artisan config:cache \
-    && php artisan route:cache \
-    && php artisan view:cache
+    && php artisan route:cache
 
 # Mudar para usuário www
 USER www
