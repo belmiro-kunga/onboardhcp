@@ -61,9 +61,14 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::get('/profile', [AdminController::class, 'profile'])->name('profile.edit');
     Route::put('/profile', [AdminController::class, 'updateProfile'])->name('profile.update');
     Route::get('/users', [AdminController::class, 'users'])->name('admin.users');
-    Route::post('/users', [AdminController::class, 'createUser'])->name('admin.users.create');
-    Route::put('/users/{user}', [AdminController::class, 'updateUser'])->name('admin.users.update');
-    Route::delete('/users/{user}', [AdminController::class, 'deleteUser'])->name('admin.users.delete');
+    Route::post('/users', [\App\Http\Controllers\UserController::class, 'store'])->name('admin.users.create');
+    Route::put('/users/{user}', [\App\Http\Controllers\UserController::class, 'update'])->name('admin.users.update');
+    Route::delete('/users/{user}', [\App\Http\Controllers\UserController::class, 'destroy'])->name('admin.users.delete');
+    
+    // User Status Control Routes
+    Route::patch('/users/{user}/status', [\App\Http\Controllers\UserController::class, 'updateStatus'])->name('admin.users.status');
+    Route::patch('/users/bulk-status', [\App\Http\Controllers\UserController::class, 'bulkUpdateStatus'])->name('admin.users.bulk-status');
+    Route::get('/users/status-statistics', [\App\Http\Controllers\UserController::class, 'getStatusStatistics'])->name('admin.users.status-statistics');
     
     // Advanced User Search Routes
     Route::prefix('users/search')->name('admin.users.search.')->group(function () {

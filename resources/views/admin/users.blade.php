@@ -333,6 +333,13 @@
                 <p class="text-emerald-100 text-sm sm:text-base lg:text-lg">Gerencie usuários, roles e permissões com ferramentas avançadas</p>
             </div>
             <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 lg:space-x-4">
+                <button onclick="openBulkStatusModal()" class="users-btn-secondary group w-full sm:w-auto" id="bulkStatusBtn" style="display: none;">
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-2 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span class="hidden sm:inline">🔄 Status em Massa</span>
+                    <span class="sm:hidden">🔄 Status</span>
+                </button>
                 <button onclick="openExportModal()" class="users-btn-secondary group w-full sm:w-auto">
                     <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-2 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
@@ -1503,10 +1510,13 @@
                             <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-500">${this.formatDate(user.created_at)}</td>
                             <td class="px-3 py-3 whitespace-nowrap text-sm font-medium">
                                 <div class="flex space-x-1">
-                                    <button onclick="editUser(${user.id}, '${safe(user.name)}', '${safe(user.email)}', '${safe(user.birth_date || '')}', '${safe(user.phone || '')}', '${safe(user.department || '')}', '${safe(user.position || '')}', '${safe(user.hire_date || '')}', '${safe(user.status || 'active')}', ${user.is_admin ? 1 : 0})" class="text-blue-600 hover:text-blue-900 p-1">
+                                    <button onclick="changeUserStatus(${user.id}, '${safe(user.name)}', '${safe(user.status || 'active')}')" class="text-green-600 hover:text-green-900 p-1" title="Alterar Status">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    </button>
+                                    <button onclick="editUser(${user.id}, '${safe(user.name)}', '${safe(user.email)}', '${safe(user.birth_date || '')}', '${safe(user.phone || '')}', '${safe(user.department || '')}', '${safe(user.position || '')}', '${safe(user.hire_date || '')}', '${safe(user.status || 'active')}', ${user.is_admin ? 1 : 0})" class="text-blue-600 hover:text-blue-900 p-1" title="Editar Usuário">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                     </button>
-                                    <button onclick="deleteUser(${user.id})" class="text-red-600 hover:text-red-900 p-1">
+                                    <button onclick="deleteUser(${user.id})" class="text-red-600 hover:text-red-900 p-1" title="Excluir Usuário">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                     </button>
                                 </div>
@@ -2206,6 +2216,160 @@
             function showError(message) {
                 alert(message);
             }
+
+            // Status Control Functions
+            function changeUserStatus(userId, userName, currentStatus) {
+                document.getElementById('statusUserName').textContent = userName;
+                document.getElementById('statusSelect').value = currentStatus;
+                document.getElementById('statusForm').action = `/admin/users/${userId}/status`;
+                document.getElementById('statusModal').classList.remove('hidden');
+                document.getElementById('statusModal').classList.add('flex');
+            }
+
+            function closeStatusModal() {
+                document.getElementById('statusModal').classList.add('hidden');
+                document.getElementById('statusModal').classList.remove('flex');
+                document.getElementById('statusReason').value = '';
+                document.getElementById('notifyUser').checked = false;
+            }
+
+            function openBulkStatusModal() {
+                const selectedCount = selectedUsers.size;
+                if (selectedCount === 0) {
+                    alert('Selecione pelo menos um usuário para alterar o status.');
+                    return;
+                }
+                
+                document.getElementById('bulkStatusCount').textContent = selectedCount;
+                document.getElementById('bulkUserIds').value = Array.from(selectedUsers).join(',');
+                document.getElementById('bulkStatusModal').classList.remove('hidden');
+                document.getElementById('bulkStatusModal').classList.add('flex');
+            }
+
+            function closeBulkStatusModal() {
+                document.getElementById('bulkStatusModal').classList.add('hidden');
+                document.getElementById('bulkStatusModal').classList.remove('flex');
+                document.getElementById('bulkStatusReason').value = '';
+                document.getElementById('notifyUsers').checked = false;
+            }
+
+            // Handle status form submission
+            document.addEventListener('DOMContentLoaded', function() {
+                const statusForm = document.getElementById('statusForm');
+                if (statusForm) {
+                    statusForm.addEventListener('submit', function(e) {
+                        e.preventDefault();
+                        
+                        const formData = new FormData(this);
+                        const submitBtn = this.querySelector('button[type="submit"]');
+                        const originalText = submitBtn.innerHTML;
+                        
+                        submitBtn.disabled = true;
+                        submitBtn.innerHTML = '<svg class="w-4 h-4 mr-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>Alterando...';
+                        
+                        fetch(this.action, {
+                            method: 'POST',
+                            body: formData,
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'Accept': 'application/json'
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                closeStatusModal();
+                                // Refresh the user list
+                                if (userSearchManager) {
+                                    userSearchManager.performSearch();
+                                }
+                                // Show success message
+                                showSuccessMessage(data.message || 'Status alterado com sucesso!');
+                            } else {
+                                throw new Error(data.message || 'Erro ao alterar status');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('Erro ao alterar status: ' + error.message);
+                        })
+                        .finally(() => {
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = originalText;
+                        });
+                    });
+                }
+
+                // Handle bulk status form submission
+                const bulkStatusForm = document.getElementById('bulkStatusForm');
+                if (bulkStatusForm) {
+                    bulkStatusForm.addEventListener('submit', function(e) {
+                        e.preventDefault();
+                        
+                        const formData = new FormData(this);
+                        const submitBtn = this.querySelector('button[type="submit"]');
+                        const originalText = submitBtn.innerHTML;
+                        
+                        submitBtn.disabled = true;
+                        submitBtn.innerHTML = '<svg class="w-4 h-4 mr-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>Alterando...';
+                        
+                        fetch(this.action, {
+                            method: 'POST',
+                            body: formData,
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'Accept': 'application/json'
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                closeBulkStatusModal();
+                                // Clear selected users
+                                selectedUsers.clear();
+                                updateSelectedUsersInfo();
+                                // Refresh the user list
+                                if (userSearchManager) {
+                                    userSearchManager.performSearch();
+                                }
+                                // Show success message
+                                showSuccessMessage(data.message || 'Status alterado com sucesso!');
+                            } else {
+                                throw new Error(data.message || 'Erro ao alterar status');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('Erro ao alterar status: ' + error.message);
+                        })
+                        .finally(() => {
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = originalText;
+                        });
+                    });
+                }
+            });
+
+            function showSuccessMessage(message) {
+                // Create a temporary success notification
+                const notification = document.createElement('div');
+                notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+                notification.innerHTML = `
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        ${message}
+                    </div>
+                `;
+                
+                document.body.appendChild(notification);
+                
+                // Remove after 3 seconds
+                setTimeout(() => {
+                    notification.remove();
+                }, 3000);
+            }
         </script>
     </x-slot>
 
@@ -2404,5 +2568,125 @@
             </div>
         </div>
     </div>
-</x-admin-layout>
+
+    <!-- Status Control Modal -->
+    <div id="statusModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-800">🔄 Alterar Status do Usuário</h3>
+                <button onclick="closeStatusModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <form id="statusForm" method="POST">
+                @csrf
+                @method('PATCH')
                 
+                <div class="mb-4">
+                    <p class="text-sm text-gray-600 mb-3">
+                        Usuário: <span id="statusUserName" class="font-medium"></span>
+                    </p>
+                    
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Novo Status</label>
+                    <select name="status" id="statusSelect" class="input-field" required>
+                        <option value="active">✅ Ativo</option>
+                        <option value="inactive">❌ Inativo</option>
+                        <option value="pending">⏳ Pendente</option>
+                        <option value="blocked">🚫 Bloqueado</option>
+                        <option value="suspended">⏸️ Suspenso</option>
+                    </select>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Motivo (opcional)</label>
+                    <textarea name="status_reason" id="statusReason" rows="3" class="input-field" 
+                              placeholder="Descreva o motivo da alteração de status..."></textarea>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="flex items-center">
+                        <input type="checkbox" name="notify_user" id="notifyUser" class="mr-2">
+                        <span class="text-sm">Notificar usuário por email sobre a alteração</span>
+                    </label>
+                </div>
+                
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="closeStatusModal()" class="users-btn-secondary">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="users-btn-primary">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Alterar Status
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Bulk Status Control Modal -->
+    <div id="bulkStatusModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-800">🔄 Alterar Status em Massa</h3>
+                <button onclick="closeBulkStatusModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <form id="bulkStatusForm" method="POST" action="{{ \Illuminate\Support\Facades\Route::has('admin.users.bulk-status') ? route('admin.users.bulk-status') : url('/admin/users/bulk-status') }}">
+                @csrf
+                @method('PATCH')
+                
+                <div class="mb-4">
+                    <p class="text-sm text-gray-600 mb-3">
+                        <span id="bulkStatusCount">0</span> usuário(s) selecionado(s)
+                    </p>
+                    
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Novo Status</label>
+                    <select name="status" id="bulkStatusSelect" class="input-field" required>
+                        <option value="active">✅ Ativo</option>
+                        <option value="inactive">❌ Inativo</option>
+                        <option value="pending">⏳ Pendente</option>
+                        <option value="blocked">🚫 Bloqueado</option>
+                        <option value="suspended">⏸️ Suspenso</option>
+                    </select>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Motivo (opcional)</label>
+                    <textarea name="status_reason" id="bulkStatusReason" rows="3" class="input-field" 
+                              placeholder="Descreva o motivo da alteração de status..."></textarea>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="flex items-center">
+                        <input type="checkbox" name="notify_users" id="notifyUsers" class="mr-2">
+                        <span class="text-sm">Notificar usuários por email sobre a alteração</span>
+                    </label>
+                </div>
+                
+                <input type="hidden" name="user_ids" id="bulkUserIds">
+                
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="closeBulkStatusModal()" class="users-btn-secondary">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="users-btn-primary">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Alterar Status
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</x-admin-layout>
