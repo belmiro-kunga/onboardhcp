@@ -70,6 +70,31 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::patch('/users/bulk-status', [\App\Http\Controllers\UserController::class, 'bulkUpdateStatus'])->name('admin.users.bulk-status');
     Route::get('/users/status-statistics', [\App\Http\Controllers\UserController::class, 'getStatusStatistics'])->name('admin.users.status-statistics');
     
+    // User Activity Tracking Routes
+    Route::prefix('activity')->name('admin.activity.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\UserActivityController::class, 'index'])->name('index');
+        Route::get('/chart-data', [\App\Http\Controllers\UserActivityController::class, 'getChartData'])->name('chart-data');
+        Route::get('/timeline', [\App\Http\Controllers\UserActivityController::class, 'getTimeline'])->name('timeline');
+        Route::get('/statistics', [\App\Http\Controllers\UserActivityController::class, 'getStatistics'])->name('statistics');
+        Route::get('/export', [\App\Http\Controllers\UserActivityController::class, 'exportReport'])->name('export');
+        Route::post('/cleanup', [\App\Http\Controllers\UserActivityController::class, 'cleanupOldActivities'])->name('cleanup');
+        Route::get('/online-users', [\App\Http\Controllers\UserActivityController::class, 'getOnlineUsers'])->name('online-users');
+        
+        // Security Alerts Routes
+        Route::get('/alerts', [\App\Http\Controllers\UserActivityController::class, 'alertsDashboard'])->name('alerts');
+        Route::get('/alert-statistics', [\App\Http\Controllers\UserActivityController::class, 'getAlertStatistics'])->name('alert-statistics');
+        Route::get('/active-alerts', [\App\Http\Controllers\UserActivityController::class, 'getActiveAlerts'])->name('active-alerts');
+        Route::get('/users-with-alerts', [\App\Http\Controllers\UserActivityController::class, 'getUsersWithAlerts'])->name('users-with-alerts');
+        Route::post('/process-alerts', [\App\Http\Controllers\UserActivityController::class, 'processAlerts'])->name('process-alerts');
+    });
+    
+    // User-specific Activity Routes
+    Route::prefix('users/{user}/activity')->name('admin.users.activity.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\UserActivityController::class, 'getUserActivity'])->name('index');
+        Route::get('/timeline', [\App\Http\Controllers\UserActivityController::class, 'getUserTimeline'])->name('timeline');
+        Route::get('/sessions', [\App\Http\Controllers\UserActivityController::class, 'getUserSessions'])->name('sessions');
+    });
+    
     // Advanced User Search Routes
     Route::prefix('users/search')->name('admin.users.search.')->group(function () {
         Route::get('/', [\App\Http\Controllers\UserSearchController::class, 'search'])->name('index');

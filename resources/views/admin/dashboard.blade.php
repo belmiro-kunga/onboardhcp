@@ -564,7 +564,7 @@
                 
                 // Enhanced Real-time Activity Feed
                 function updateActivityFeed() {
-                    const activities = [
+                    const activityTemplates = [
                         {
                             icon: 'user',
                             color: 'blue',
@@ -601,7 +601,7 @@
                     if (activityFeed) {
                         // Add new activity occasionally
                         if (Math.random() > 0.7) {
-                            const randomActivity = activities[Math.floor(Math.random() * activities.length)];
+                            const randomActivity = activityTemplates[Math.floor(Math.random() * activityTemplates.length)];
                             const newActivity = document.createElement('div');
                             newActivity.className = 'activity-item opacity-0 transform translate-y-4 transition-all duration-500';
                             
@@ -631,9 +631,9 @@
                             }, 100);
                             
                             // Remove old activities if too many
-                            const activities = activityFeed.querySelectorAll('.activity-item');
-                            if (activities.length > 6) {
-                                const oldActivity = activities[activities.length - 1];
+                            const activityItems = activityFeed.querySelectorAll('.activity-item');
+                            if (activityItems.length > 6) {
+                                const oldActivity = activityItems[activityItems.length - 1];
                                 oldActivity.classList.add('opacity-0', 'transform', 'translate-y-4');
                                 setTimeout(() => {
                                     oldActivity.remove();

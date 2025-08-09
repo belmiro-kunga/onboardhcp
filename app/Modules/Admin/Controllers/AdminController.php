@@ -9,21 +9,25 @@ use App\Modules\Auth\Services\AuthService;
 use App\Modules\User\Services\UserService;
 use App\Modules\Birthday\Services\BirthdayService;
 use App\Modules\User\Models\User;
+use App\Services\UserActivityService;
 
 class AdminController extends Controller
 {
     protected $authService;
     protected $userService;
     protected $birthdayService;
+    protected $activityService;
 
     public function __construct(
         AuthService $authService,
         UserService $userService,
-        BirthdayService $birthdayService
+        BirthdayService $birthdayService,
+        UserActivityService $activityService
     ) {
         $this->authService = $authService;
         $this->userService = $userService;
         $this->birthdayService = $birthdayService;
+        $this->activityService = $activityService;
         $this->middleware(['auth', 'admin'])->except(['showLoginForm', 'login']);
     }
 
@@ -42,6 +46,10 @@ class AdminController extends Controller
         if ($this->authService->attemptLogin($credentials)) {
             if ($this->authService->isAdmin()) {
                 $request->session()->regenerate();
+                
+                // Log admin login activity
+                $this->activityService->logLogin(auth()->user(), $request);
+                
                 return redirect()->intended('/admin/dashboard');
             } else {
                 $this->authService->logout();

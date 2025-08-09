@@ -5,6 +5,7 @@ namespace App\Modules\Auth\Controllers;
 use App\Http\Controllers\Controller;
 use App\Modules\Auth\Services\AuthService;
 use App\Modules\Birthday\Services\BirthdayService;
+use App\Services\UserActivityService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -12,11 +13,13 @@ class AuthController extends Controller
 {
     protected $authService;
     protected $birthdayService;
+    protected $activityService;
 
-    public function __construct(AuthService $authService, BirthdayService $birthdayService)
+    public function __construct(AuthService $authService, BirthdayService $birthdayService, UserActivityService $activityService)
     {
         $this->authService = $authService;
         $this->birthdayService = $birthdayService;
+        $this->activityService = $activityService;
     }
 
     public function showLoginForm()
@@ -36,6 +39,10 @@ class AuthController extends Controller
 
         if ($this->authService->attemptLogin($credentials)) {
             $request->session()->regenerate();
+            
+            // Log login activity
+            $this->activityService->logLogin(Auth::user(), $request);
+            
             return redirect()->intended('/funcionario');
         }
 
@@ -46,6 +53,11 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
+        // Log logout activity before logging out
+        if (Auth::check()) {
+            $this->activityService->logLogout(Auth::user(), $request);
+        }
+        
         $this->authService->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
