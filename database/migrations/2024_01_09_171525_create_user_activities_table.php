@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('url')->nullable();
             $table->string('method', 10)->nullable(); // GET, POST, PUT, DELETE
             $table->json('metadata')->nullable(); // Additional data like form data, etc.
-            $table->timestamp('created_at');
+            $table->timestamps();
             
             // Indexes for performance
             $table->index(['user_id', 'created_at']);

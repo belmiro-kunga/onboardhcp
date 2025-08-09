@@ -155,7 +155,7 @@
                 </div>
             </div>
             <div class="flex items-center">
-                <span class="text-3xl font-bold">{{ $inactiveUsers->count() }}</span>
+                <span class="text-3xl font-bold">{{ collect($inactiveUsers)->count() }}</span>
                 <span class="ml-2 text-sm bg-white/20 px-2 py-1 rounded-full">⏰</span>
             </div>
         </div>
@@ -184,15 +184,29 @@
                 <h3 class="text-lg font-semibold text-gray-800">📊 Tipos de Atividade</h3>
             </div>
             <div class="space-y-4">
-                @foreach($systemStats['activity_types'] as $activityType)
-                    @php
-                        $activity = new \App\Models\UserActivity(['activity_type' => $activityType->activity_type]);
-                        $percentage = $systemStats['total_activities'] > 0 ? round(($activityType->count / $systemStats['total_activities']) * 100, 1) : 0;
+                @foreach(collect($systemStats['activity_types']) as $activityType)
+                                            @php
+                        $activityCount = data_get($activityType, 'count', 0);
+                        $percentage = $systemStats['total_activities'] > 0 ? round(($activityCount / $systemStats['total_activities']) * 100, 1) : 0;
+                        $activityTypeLabel = ucfirst(str_replace('_', ' ', data_get($activityType, 'activity_type')));
+                        $activityIcons = [
+                            'login' => '🔐',
+                            'logout' => '🚪',
+                            'page_view' => '👁️',
+                            'form_submit' => '📝',
+                            'search' => '🔍',
+                            'export' => '📊',
+                            'status_change' => '🔄',
+                            'profile_update' => '👤',
+                            'file_upload' => '📤',
+                            'file_download' => '📥'
+                        ];
+                        $activityIcon = $activityIcons[data_get($activityType, 'activity_type')] ?? '📋';
                     @endphp
                     <div class="flex items-center justify-between">
                         <div class="flex items-center">
-                            <span class="text-lg mr-2">{{ $activity->getActivityIcon() }}</span>
-                            <span class="text-sm font-medium text-gray-700">{{ $activity->getActivityTypeLabel() }}</span>
+                            <span class="text-lg mr-2">{{ $activityIcon }}</span>
+                            <span class="text-sm font-medium text-gray-700">{{ $activityTypeLabel }}</span>
                         </div>
                         <div class="flex items-center">
                             <div class="w-32 bg-gray-200 rounded-full h-2 mr-3">
@@ -227,7 +241,7 @@
                 <h3 class="text-lg font-semibold text-gray-800">🏆 Usuários Mais Ativos</h3>
             </div>
             <div class="space-y-4">
-                @foreach($systemStats['most_active_users']->take(10) as $index => $userActivity)
+                @foreach(collect($systemStats['most_active_users'])->take(10) as $index => $userActivity)
                     <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                         <div class="flex items-center">
                             <div class="flex-shrink-0 mr-3">
@@ -264,13 +278,29 @@
                 loadTimeline();
                 
                 // Chart period change handler
-                document.getElementById('chartPeriod').addEventListener('change', function() {
-                    updateChart(this.value);
-                });
+                const chartPeriodElement = document.getElementById('chartPeriod');
+                if (chartPeriodElement) {
+                    chartPeriodElement.addEventListener('change', function() {
+                        updateChart(this.value);
+                    });
+                } else {
+                    console.error('Chart period element not found');
+                }
             });
 
             function initializeChart() {
-                const ctx = document.getElementById('activityChart').getContext('2d');
+                const chartElement = document.getElementById('activityChart');
+                if (!chartElement) {
+                    console.error('Chart element not found');
+                    return;
+                }
+                
+                if (typeof Chart === 'undefined') {
+                    console.error('Chart.js not loaded');
+                    return;
+                }
+                
+                const ctx = chartElement.getContext('2d');
                 activityChart = new Chart(ctx, {
                     type: 'line',
                     data: {
@@ -336,6 +366,10 @@
 
             function renderTimeline(activities) {
                 const timeline = document.getElementById('activityTimeline');
+                if (!timeline) {
+                    console.error('Timeline element not found');
+                    return;
+                }
                 timeline.innerHTML = '';
                 
                 activities.forEach(activity => {

@@ -249,6 +249,9 @@ class UserActivityService
 
     /**
      * Get system-wide activity statistics
+     * 
+     * @param int $days
+     * @return array
      */
     public function getSystemActivityStats(int $days = 30): array
     {
@@ -271,7 +274,7 @@ class UserActivityService
             ->limit(10)
             ->get();
 
-        // Activity types distribution
+        // Activity types distribution - ensure we always return a Collection
         $activityTypes = UserActivity::where('created_at', '>=', $startDate)
             ->select('activity_type', DB::raw('count(*) as count'))
             ->groupBy('activity_type')
@@ -289,7 +292,7 @@ class UserActivityService
             'total_activities' => $totalActivities,
             'active_users' => $activeUsers,
             'most_active_users' => $mostActiveUsers,
-            'activity_types' => $activityTypes,
+            'activity_types' => $activityTypes, // Now always a Collection
             'daily_trend' => $dailyTrend,
             'period_days' => $days
         ];
@@ -307,25 +310,29 @@ class UserActivityService
 
     /**
      * Get recent logins (last 24 hours)
+     * 
+     * @param int $limit
+     * @return \Illuminate\Database\Eloquent\Collection
      */
-    public function getRecentLogins(int $limit = 10): array
+    public function getRecentLogins(int $limit = 10): \Illuminate\Database\Eloquent\Collection
     {
-        $recentLogins = UserActivity::where('activity_type', UserActivity::TYPE_LOGIN)
+        return UserActivity::where('activity_type', UserActivity::TYPE_LOGIN)
             ->where('created_at', '>=', now()->subDay())
             ->with('user:id,name,email')
             ->orderBy('created_at', 'desc')
             ->limit($limit)
-            ->get();
-
-        return $recentLogins->map(function ($activity) {
-            return [
-                'user' => $activity->user,
-                'login_time' => $activity->created_at,
-                'ip_address' => $activity->ip_address,
-                'browser' => $activity->browser,
-                'device_type' => $activity->device_type
-            ];
-        })->toArray();
+            ->get()
+            ->map(function ($activity) {
+                return (object)[
+                    'user' => $activity->user,
+                    'login_time' => $activity->created_at,
+                    'ip_address' => $activity->ip_address,
+                    'browser' => $activity->browser,
+                    'device_type' => $activity->device_type,
+                    'created_at' => $activity->created_at,
+                    'activity_type' => $activity->activity_type
+                ];
+            });
     }
 
     /**
@@ -379,6 +386,8 @@ class UserActivityService
             'total' => array_sum($summary)
         ];
     }
+
+
 
     /**
      * Get users who haven't logged in recently

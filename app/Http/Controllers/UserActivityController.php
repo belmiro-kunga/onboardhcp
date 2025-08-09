@@ -250,10 +250,205 @@ class UserActivityController extends Controller
                 'cutoff_minutes' => $minutes
             ]
         ]);
+    }
 
-        return response()->json([
-            'success' => true,
-            'data' => $sessions
+    /**
+     * Process security alerts
+     */
+    public function processAlerts(): JsonResponse
+    {
+        try {
+            $alerts = $this->alertService->processAlerts();
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Alertas processados com sucesso',
+                'processed_count' => count($alerts),
+                'alerts' => $alerts
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erro ao processar alertas: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Display user activity history page
+     */
+    public function userActivityHistory(User $user): View
+    {
+        return view('admin.users.activity', compact('user'));
+    }
+
+    /**
+     * Get user session information
+     */
+    public function getUserSessions(User $user): JsonResponse
+    {
+        try {
+            $sessions = $this->activityService->getUserSessions($user->id);
+            
+            return response()->json([
+                'success' => true,
+                'sessions' => $sessions
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erro ao obter sessões do usuário: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get user activities (alias for getUserActivitiesPaginated for backward compatibility)
+     */
+    public function getUserActivity(User $user, Request $request): JsonResponse
+    {
+        return $this->getUserActivitiesPaginated($user, $request);
+    }
+
+    /**
+     * Get paginated user activities with filters
+     */
+    public function getUserActivitiesPaginated(User $user, Request $request): JsonResponse
+    {
+        try {
+            $perPage = $request->get('per_page', 50);
+            $filters = $request->only(['activity_type', 'date_from', 'date_to', 'ip_address']);
+            
+            // First, get the base query
+            $query = UserActivity::where('user_id', $user->id);
+
+            // Apply filters
+            if (!empty($filters['activity_type'])) {
+                $query->where('activity_type', $filters['activity_type']);
+            }
+
+            if (!empty($filters['date_from'])) {
+                $query->whereDate('created_at', '>=', $filters['date_from']);
+            }
+
+            if (!empty($filters['date_to'])) {
+                $query->whereDate('created_at', '<=', $filters['date_to']);
+            }
+
+            if (!empty($filters['ip_address'])) {
+                $query->where('ip_address', 'like', '%' . $filters['ip_address'] . '%');
+            }
+
+            // Execute the count query first
+            $total = (clone $query)->count();
+            
+            // Then get the paginated results
+            $activities = $query->orderBy('created_at', 'desc')
+                              ->paginate($perPage);
+
+            // Transform activities data
+            $transformedActivities = $activities->getCollection()->map(function ($activity) {
+                return [
+                    'id' => $activity->id,
+                    'activity_type' => $activity->activity_type,
+                    'description' => $activity->activity_description ?? $activity->description,
+                    'ip_address' => $activity->ip_address,
+                    'user_agent' => $activity->user_agent,
+                    'url' => $activity->url,
+                    'method' => $activity->method,
+                    'session_id' => $activity->session_id,
+                    'metadata' => $activity->metadata,
+                    'created_at' => $activity->created_at->toISOString(),
+                    'created_at_formatted' => $activity->created_at->format('d/m/Y H:i:s')
+                ];
+            });
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'data' => $transformedActivities,
+                    'current_page' => $activities->currentPage(),
+                    'last_page' => $activities->lastPage(),
+                    'per_page' => $activities->perPage(),
+                    'total' => $activities->total(),
+                    'from' => $activities->firstItem(),
+                    'to' => $activities->lastItem(),
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erro ao obter atividades: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Export user activity report
+     */
+    public function exportUserActivityReport(User $user, Request $request): \Symfony\Component\HttpFoundation\StreamedResponse
+    {
+        $filters = $request->only(['activity_type', 'date_from', 'date_to', 'ip_address']);
+        
+        $query = UserActivity::where('user_id', $user->id)
+            ->orderBy('created_at', 'desc');
+
+        // Apply filters
+        if (!empty($filters['activity_type'])) {
+            $query->where('activity_type', $filters['activity_type']);
+        }
+
+        if (!empty($filters['date_from'])) {
+            $query->whereDate('created_at', '>=', $filters['date_from']);
+        }
+
+        if (!empty($filters['date_to'])) {
+            $query->whereDate('created_at', '<=', $filters['date_to']);
+        }
+
+        if (!empty($filters['ip_address'])) {
+            $query->where('ip_address', 'like', '%' . $filters['ip_address'] . '%');
+        }
+
+        $fileName = 'atividades_' . $user->name . '_' . now()->format('Y-m-d_H-i-s') . '.csv';
+
+        return response()->streamDownload(function () use ($query, $user) {
+            $handle = fopen('php://output', 'w');
+            
+            // CSV headers
+            fputcsv($handle, [
+                'Data/Hora',
+                'Tipo de Atividade',
+                'Descrição',
+                'Endereço IP',
+                'Navegador',
+                'Dispositivo',
+                'URL',
+                'Método HTTP',
+                'ID da Sessão'
+            ]);
+
+            // Process activities in chunks to avoid memory issues
+            $query->chunk(1000, function ($activities) use ($handle) {
+                foreach ($activities as $activity) {
+                    fputcsv($handle, [
+                        $activity->created_at->format('d/m/Y H:i:s'),
+                        $activity->getActivityLabel(),
+                        $activity->description,
+                        $activity->ip_address,
+                        $activity->browser,
+                        $activity->device_type,
+                        $activity->url,
+                        $activity->method,
+                        $activity->session_id
+                    ]);
+                }
+            });
+
+            fclose($handle);
+        }, $fileName, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
         ]);
     }
 }

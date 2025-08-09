@@ -89,10 +89,13 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     });
     
     // User-specific Activity Routes
-    Route::prefix('users/{user}/activity')->name('admin.users.activity.')->group(function () {
-        Route::get('/', [\App\Http\Controllers\UserActivityController::class, 'getUserActivity'])->name('index');
-        Route::get('/timeline', [\App\Http\Controllers\UserActivityController::class, 'getUserTimeline'])->name('timeline');
-        Route::get('/sessions', [\App\Http\Controllers\UserActivityController::class, 'getUserSessions'])->name('sessions');
+    Route::prefix('users/{user}')->name('admin.users.')->group(function () {
+        Route::get('/activity', [\App\Http\Controllers\UserActivityController::class, 'userActivityHistory'])->name('activity');
+        Route::get('/activity/data', [\App\Http\Controllers\UserActivityController::class, 'getUserActivitiesPaginated'])->name('activity.data');
+        Route::get('/activity/stats', [\App\Http\Controllers\UserActivityController::class, 'getUserActivityStats'])->name('activity.stats');
+        Route::get('/activity/export', [\App\Http\Controllers\UserActivityController::class, 'exportUserActivityReport'])->name('activity.export');
+        Route::get('/activity/timeline', [\App\Http\Controllers\UserActivityController::class, 'getUserTimeline'])->name('activity.timeline');
+        Route::get('/activity/sessions', [\App\Http\Controllers\UserActivityController::class, 'getUserSessions'])->name('activity.sessions');
     });
     
     // Advanced User Search Routes

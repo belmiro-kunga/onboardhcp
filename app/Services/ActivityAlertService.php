@@ -6,6 +6,7 @@ use App\Models\UserActivity;
 use App\Modules\User\Models\User;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class ActivityAlertService
@@ -304,7 +305,7 @@ class ActivityAlertService
         // This would typically query alerts data
         // For now, return users with suspicious activity patterns
         $suspiciousUsers = UserActivity::where('created_at', '>=', now()->subDays($days))
-            ->select('user_id')
+            ->select('user_id', DB::raw('COUNT(*) as activity_count'))
             ->groupBy('user_id')
             ->havingRaw('COUNT(*) > 50') // Users with more than 50 activities per day on average
             ->with('user:id,name,email')
@@ -312,8 +313,8 @@ class ActivityAlertService
             ->map(function ($activity) {
                 return [
                     'user' => $activity->user,
-                    'activity_count' => $activity->count(),
-                    'risk_level' => $activity->count() > 100 ? 'high' : 'medium'
+                    'activity_count' => $activity->activity_count,
+                    'risk_level' => $activity->activity_count > 100 ? 'high' : 'medium'
                 ];
             });
 
