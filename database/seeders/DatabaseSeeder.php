@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             PermissionSeeder::class, // Add this first to ensure permissions exist before users
+            RolePermissionSeeder::class, // Add roles and permissions for advanced user management
             UserSeeder::class,
             CategorySeeder::class,
             VideoTrainingSeeder::class,

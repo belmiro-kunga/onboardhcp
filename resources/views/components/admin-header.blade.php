@@ -1,11 +1,15 @@
 @props(['title' => 'Dashboard'])
 
-<div class="header flex items-center justify-between">
+<div class="header flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8 bg-white border-b border-gray-200">
     <div class="flex items-center">
-        <svg class="w-6 h-6 text-gray-400 mr-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-        </svg>
-        <h1 class="text-xl font-semibold text-gray-900">{{ $title }}</h1>
+        <!-- Mobile Menu Button -->
+        <button onclick="toggleMobileMenu()" class="lg:hidden p-2 text-gray-400 hover:text-gray-600 mr-3">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+        </button>
+        
+        <h1 class="text-lg sm:text-xl font-semibold text-gray-900">{{ $title }}</h1>
     </div>
     
     <div class="flex items-center space-x-4">

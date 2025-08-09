@@ -1,10 +1,12 @@
+@props(['title' => 'OnboardHCP'])
+
 <!DOCTYPE html>
 <html lang="pt">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ $title ?? 'Admin Panel' }} - Hemera Capital Partners</title>
+    <title>{{ $title }} - Hemera Capital Partners</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
@@ -28,33 +30,6 @@
             background-color: var(--menu-background);
         }
         
-        .sidebar {
-            width: 240px;
-            background-color: var(--background);
-            border-right: 1px solid var(--border);
-        }
-        
-        .menu-item {
-            height: 48px;
-            padding: 12px 16px;
-            display: flex;
-            align-items: center;
-            color: var(--text-secondary);
-            transition: all 0.2s ease;
-            text-decoration: none;
-        }
-        
-        .menu-item:hover {
-            background-color: var(--menu-highlight);
-            color: var(--primary);
-        }
-        
-        .menu-item.active {
-            background-color: var(--menu-highlight);
-            color: var(--primary);
-            border-right: 3px solid var(--primary);
-        }
-        
         .header {
             height: 64px;
             background-color: var(--background);
@@ -65,6 +40,7 @@
         .content {
             padding: 24px;
             background-color: var(--menu-background);
+            min-height: calc(100vh - 64px);
         }
         
         .card {
@@ -73,13 +49,6 @@
             padding: 16px 24px;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
             margin-bottom: 24px;
-        }
-        
-        .widget {
-            background-color: var(--background);
-            border-radius: 8px;
-            padding: 16px 24px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
         
         .btn-primary {
@@ -108,12 +77,6 @@
             transition: all 0.2s ease;
             font-size: 14px;
             font-weight: 500;
-        }
-        
-        .metric-value {
-            font-size: 32px;
-            color: var(--primary);
-            font-weight: 700;
         }
         
         .avatar {
@@ -153,69 +116,58 @@
             background-color: #E6F7FF;
             color: var(--info);
         }
-        
-        .role-admin {
-            background-color: #F6FFED;
-            color: var(--success);
-        }
-        
-        .role-user {
-            background-color: #FFF7E6;
-            color: var(--warning);
-        }
     </style>
     {{ $styles ?? '' }}
 </head>
 <body class="min-h-screen bg-gray-50">
-    <!-- Mobile Menu Overlay -->
-    <div id="mobile-menu-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden lg:hidden"></div>
-    
-    <!-- Sidebar -->
-    <x-admin-sidebar :active="$activeMenu ?? 'dashboard'" />
-
-    <!-- Main Content -->
-    <div class="flex-1 lg:ml-60 transition-all duration-300">
-        <!-- Header -->
-        <x-admin-header :title="$pageTitle ?? 'Dashboard'" />
-
-        <!-- Content -->
-        <div class="content p-4 sm:p-6 lg:p-8">
-            {{ $slot }}
+    <!-- Header -->
+    <div class="header flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8 bg-white border-b border-gray-200">
+        <div class="flex items-center">
+            <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center mr-3">
+                <span class="text-white font-bold text-sm">HC</span>
+            </div>
+            <h1 class="text-lg sm:text-xl font-semibold text-gray-900">{{ $title }}</h1>
+        </div>
+        
+        <div class="flex items-center space-x-4">
+            <!-- Notifications -->
+            <button class="p-2 text-gray-400 hover:text-gray-600 relative">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5v-5zM4 19h6v-2H4v2z"></path>
+                </svg>
+                <span class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
+            </button>
+            
+            <!-- User Avatar -->
+            @auth
+            <div class="flex items-center space-x-3">
+                <div class="avatar">
+                    {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                </div>
+                <div class="hidden md:block">
+                    <p class="text-sm font-medium text-gray-900">{{ Auth::user()->name }}</p>
+                    <p class="text-xs text-gray-500">Funcionário</p>
+                </div>
+            </div>
+            
+            <!-- Logout -->
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit" class="btn-secondary text-sm">
+                    <svg class="w-4 h-4 mr-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                    </svg>
+                    Sair
+                </button>
+            </form>
+            @endauth
         </div>
     </div>
 
-    <!-- Mobile Menu Toggle Script -->
-    <script>
-        function toggleMobileMenu() {
-            const sidebar = document.querySelector('[data-sidebar]');
-            const overlay = document.getElementById('mobile-menu-overlay');
-            const isOpen = sidebar.classList.contains('translate-x-0');
-            
-            if (isOpen) {
-                sidebar.classList.remove('translate-x-0');
-                sidebar.classList.add('-translate-x-full');
-                overlay.classList.add('hidden');
-            } else {
-                sidebar.classList.remove('-translate-x-full');
-                sidebar.classList.add('translate-x-0');
-                overlay.classList.remove('hidden');
-            }
-        }
-        
-        // Close menu when clicking overlay
-        document.getElementById('mobile-menu-overlay').addEventListener('click', toggleMobileMenu);
-        
-        // Close menu on window resize to desktop
-        window.addEventListener('resize', function() {
-            if (window.innerWidth >= 1024) {
-                const sidebar = document.querySelector('[data-sidebar]');
-                const overlay = document.getElementById('mobile-menu-overlay');
-                sidebar.classList.remove('-translate-x-full');
-                sidebar.classList.add('translate-x-0');
-                overlay.classList.add('hidden');
-            }
-        });
-    </script>
+    <!-- Main Content -->
+    <div class="content p-4 sm:p-6 lg:p-8">
+        {{ $slot }}
+    </div>
 
     {{ $scripts ?? '' }}
 </body>

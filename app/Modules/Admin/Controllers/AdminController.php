@@ -128,8 +128,25 @@ class AdminController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:6',
             'birth_date' => 'required|date',
+            'phone' => 'nullable|string|max:20',
+            'department' => 'nullable|string|max:100',
+            'position' => 'nullable|string|max:100',
+            'hire_date' => 'nullable|date',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'status' => 'nullable|in:active,inactive,pending,blocked,suspended',
             'is_admin' => 'boolean',
         ]);
+
+        // Handle avatar upload if present
+        if ($request->hasFile('avatar')) {
+            $avatarPath = $request->file('avatar')->store('avatars', 'public');
+            $validatedData['avatar'] = $avatarPath;
+        }
+
+        // Set default status if not provided
+        if (!isset($validatedData['status'])) {
+            $validatedData['status'] = 'active';
+        }
 
         $this->userService->createUser($validatedData);
 
@@ -142,9 +159,26 @@ class AdminController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'birth_date' => 'required|date',
+            'phone' => 'nullable|string|max:20',
+            'department' => 'nullable|string|max:100',
+            'position' => 'nullable|string|max:100',
+            'hire_date' => 'nullable|date',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'status' => 'nullable|in:active,inactive,pending,blocked,suspended',
             'is_admin' => 'boolean',
             'password' => 'nullable|string|min:6',
         ]);
+
+        // Handle avatar upload if present
+        if ($request->hasFile('avatar')) {
+            // Delete old avatar if exists
+            if ($user->avatar && \Storage::disk('public')->exists($user->avatar)) {
+                \Storage::disk('public')->delete($user->avatar);
+            }
+            
+            $avatarPath = $request->file('avatar')->store('avatars', 'public');
+            $validatedData['avatar'] = $avatarPath;
+        }
 
         $this->userService->updateUser($user, $validatedData);
 

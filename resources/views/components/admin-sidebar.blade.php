@@ -1,6 +1,6 @@
 @props(['active' => 'dashboard'])
 
-<div class="sidebar fixed left-0 top-0 h-full">
+<div class="sidebar fixed left-0 top-0 h-full w-60 bg-white border-r border-gray-200 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out z-50" data-sidebar>
     <!-- Logo -->
     <div class="p-6 border-b border-gray-200">
         <div class="flex items-center">

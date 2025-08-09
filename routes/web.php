@@ -65,6 +65,27 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::put('/users/{user}', [AdminController::class, 'updateUser'])->name('admin.users.update');
     Route::delete('/users/{user}', [AdminController::class, 'deleteUser'])->name('admin.users.delete');
     
+    // Advanced User Search Routes
+    Route::prefix('users/search')->name('admin.users.search.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\UserSearchController::class, 'search'])->name('index');
+        Route::get('/suggestions', [\App\Http\Controllers\UserSearchController::class, 'suggestions'])->name('suggestions');
+        Route::get('/filter-options', [\App\Http\Controllers\UserSearchController::class, 'filterOptions'])->name('filter-options');
+        Route::post('/save-config', [\App\Http\Controllers\UserSearchController::class, 'saveSearchConfig'])->name('save-config');
+        Route::get('/saved-configs', [\App\Http\Controllers\UserSearchController::class, 'getSavedConfigs'])->name('saved-configs');
+        Route::get('/export', [\App\Http\Controllers\UserSearchController::class, 'export'])->name('export');
+    });
+    
+    // Import/Export Routes
+    Route::prefix('users/import-export')->name('admin.users.import-export.')->group(function () {
+        Route::get('/export', [\App\Http\Controllers\ImportExportController::class, 'exportUsers'])->name('export');
+        Route::post('/export-selected', [\App\Http\Controllers\ImportExportController::class, 'exportUsers'])->name('export-selected');
+        Route::get('/template', [\App\Http\Controllers\ImportExportController::class, 'downloadTemplate'])->name('template');
+        Route::post('/preview', [\App\Http\Controllers\ImportExportController::class, 'previewImport'])->name('preview');
+        Route::post('/import', [\App\Http\Controllers\ImportExportController::class, 'importUsers'])->name('import');
+        Route::get('/history', [\App\Http\Controllers\ImportExportController::class, 'getHistory'])->name('history');
+        Route::post('/cancel/{jobId}', [\App\Http\Controllers\ImportExportController::class, 'cancelOperation'])->name('cancel');
+    });
+    
     // Rotas de Simulados com Wizard
     Route::prefix('simulados')->name('admin.simulados.')->group(function () {
         Route::get('/', [\App\Modules\Admin\Controllers\AdminSimuladoController::class, 'index'])->name('index');
@@ -120,6 +141,63 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
         Route::delete('/{id}', [AdminController::class, 'coursesDestroy'])->name('destroy');
     });
     
+    // Rotas de Roles e Permissões
+    Route::prefix('roles')->name('admin.roles.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\RoleController::class, 'index'])->name('index');
+        Route::get('/create', [\App\Http\Controllers\RoleController::class, 'create'])->name('create');
+        Route::post('/', [\App\Http\Controllers\RoleController::class, 'store'])->name('store');
+        Route::get('/{role}', [\App\Http\Controllers\RoleController::class, 'show'])->name('show');
+        Route::get('/{role}/edit', [\App\Http\Controllers\RoleController::class, 'edit'])->name('edit');
+        Route::put('/{role}', [\App\Http\Controllers\RoleController::class, 'update'])->name('update');
+        Route::delete('/{role}', [\App\Http\Controllers\RoleController::class, 'destroy'])->name('destroy');
+        
+        // Permission management for roles
+        Route::post('/{role}/permissions', [\App\Http\Controllers\RoleController::class, 'assignPermissions'])->name('permissions.assign');
+        Route::delete('/{role}/permissions', [\App\Http\Controllers\RoleController::class, 'removePermissions'])->name('permissions.remove');
+        Route::get('/{role}/permissions', [\App\Http\Controllers\RoleController::class, 'permissions'])->name('permissions');
+        Route::get('/{role}/users', [\App\Http\Controllers\RoleController::class, 'users'])->name('users');
+    });
+    
+    // Rotas de Grupos de Utilizadores
+    Route::prefix('groups')->name('admin.groups.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\UserGroupController::class, 'index'])->name('index');
+        Route::get('/create', [\App\Http\Controllers\UserGroupController::class, 'create'])->name('create');
+        Route::post('/', [\App\Http\Controllers\UserGroupController::class, 'store'])->name('store');
+        Route::get('/{group}', [\App\Http\Controllers\UserGroupController::class, 'show'])->name('show');
+        Route::get('/{group}/edit', [\App\Http\Controllers\UserGroupController::class, 'edit'])->name('edit');
+        Route::put('/{group}', [\App\Http\Controllers\UserGroupController::class, 'update'])->name('update');
+        Route::delete('/{group}', [\App\Http\Controllers\UserGroupController::class, 'destroy'])->name('destroy');
+        
+        // User management for groups
+        Route::post('/{group}/users', [\App\Http\Controllers\UserGroupController::class, 'addUsers'])->name('users.add');
+        Route::delete('/{group}/users', [\App\Http\Controllers\UserGroupController::class, 'removeUsers'])->name('users.remove');
+        
+        // Permission management for groups
+        Route::post('/{group}/permissions', [\App\Http\Controllers\UserGroupController::class, 'assignPermissions'])->name('permissions.assign');
+        Route::delete('/{group}/permissions', [\App\Http\Controllers\UserGroupController::class, 'removePermissions'])->name('permissions.remove');
+        
+        // Helper routes
+        Route::get('/api/available-users', [\App\Http\Controllers\UserGroupController::class, 'availableUsers'])->name('api.available-users');
+        Route::get('/api/departments', [\App\Http\Controllers\UserGroupController::class, 'departments'])->name('api.departments');
+    });
+    
+    // Rotas de Gestão de Roles de Utilizadores
+    Route::prefix('users/{user}/roles')->name('admin.user-roles.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\UserRoleController::class, 'index'])->name('index');
+        Route::post('/', [\App\Http\Controllers\UserRoleController::class, 'store'])->name('store');
+        Route::delete('/{role}', [\App\Http\Controllers\UserRoleController::class, 'destroy'])->name('destroy');
+        Route::put('/sync', [\App\Http\Controllers\UserRoleController::class, 'sync'])->name('sync');
+        Route::get('/permissions', [\App\Http\Controllers\UserRoleController::class, 'permissions'])->name('permissions');
+        Route::get('/permissions/view', [\App\Http\Controllers\UserRoleController::class, 'showPermissions'])->name('permissions.view');
+        Route::post('/check-permission', [\App\Http\Controllers\UserRoleController::class, 'checkPermission'])->name('check-permission');
+    });
+    
+    // Rotas de Ações em Lote para Roles
+    Route::prefix('bulk-roles')->name('admin.bulk-roles.')->group(function () {
+        Route::post('/assign', [\App\Http\Controllers\UserRoleController::class, 'bulkAssign'])->name('assign');
+        Route::post('/remove', [\App\Http\Controllers\UserRoleController::class, 'bulkRemove'])->name('remove');
+    });
+
     // Outras rotas administrativas
     Route::get('/atribuicoes', [AdminController::class, 'atribuicoes'])->name('admin.atribuicoes');
     Route::get('/gamificacao', [AdminController::class, 'gamificacao'])->name('admin.gamificacao');

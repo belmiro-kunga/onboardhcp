@@ -14,7 +14,8 @@ class UserGroup extends Model
     protected $fillable = [
         'name',
         'description',
-        'is_system'
+        'is_system',
+        'type'
     ];
 
     protected $casts = [

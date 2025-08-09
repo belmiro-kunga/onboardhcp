@@ -12,6 +12,7 @@ class Permission extends Model
         'name',
         'slug',
         'description',
+        'module',
         'model_type'
     ];
 
@@ -21,6 +22,15 @@ class Permission extends Model
     public function groups(): BelongsToMany
     {
         return $this->belongsToMany(UserGroup::class, 'group_permission', 'permission_id', 'group_id')
+            ->withTimestamps();
+    }
+
+    /**
+     * The roles that have this permission.
+     */
+    public function roles(): BelongsToMany
+    {
+        return $this->belongsToMany(Role::class, 'role_permissions')
             ->withTimestamps();
     }
 
